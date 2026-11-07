@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Day 2 interface prototype for SmartCampus." />
+    <title>SmartCampus | Facility Booking</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#student-dashboard" aria-label="SmartCampus home">
+        <span class="brand-mark">SC</span><span>SmartCampus</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#student-dashboard" data-route="student-dashboard">Explore</a>
+        <a href="#my-bookings" data-route="my-bookings">My bookings</a>
+        <a href="#admin-dashboard" data-route="admin-dashboard">Admin preview</a>
+      </nav>
+      <a class="avatar" href="#login" data-route="login" aria-label="Open sign in">AS</a>
+    </header>
+
+    <main>
+      <section id="login" class="screen auth-screen" data-screen>
+        <div class="auth-card">
+          <p class="eyebrow">CAMPUS FACILITY BOOKING</p>
+          <h1>Welcome to SmartCampus</h1>
+          <p class="muted">Sign in to book spaces, or create a student account.</p>
+          <div class="tab-list" role="tablist" aria-label="Authentication option">
+            <button class="tab active" data-auth-tab="signin" role="tab">Sign in</button>
+            <button class="tab" data-auth-tab="signup" role="tab">Create account</button>
+          </div>
+          <form id="auth-form" class="form-grid">
+            <label class="signup-only" hidden>Full name<input type="text" placeholder="Aarav Sharma" /></label>
+            <label>College email<input type="email" placeholder="you@campus.edu" required /></label>
+            <label>Password<input type="password" placeholder="••••••••" required /></label>
+            <p class="form-note signup-only" hidden>New accounts are created as students. Administrators are assigned by the campus team.</p>
+            <button class="button primary" type="submit">Continue</button>
+          </form>
+          <p id="auth-message" class="status-message" aria-live="polite"></p>
+        </div>
+        <aside class="auth-aside">
+          <span class="icon-box">▣</span>
+          <h2>Find the right space for your next idea.</h2>
+          <p>Browse labs, halls, libraries, and sports facilities in one place.</p>
+        </aside>
+      </section>
+
+      <section id="student-dashboard" class="screen" data-screen hidden>
+        <div class="page-heading">
+          <div><p class="eyebrow">STUDENT DASHBOARD</p><h1>Find a campus facility</h1><p class="muted">See availability and submit a booking request.</p></div>
+          <a class="button secondary" href="#my-bookings" data-route="my-bookings">My bookings</a>
+        </div>
+        <div class="filter-bar" aria-label="Facility filters">
+          <label>Search<input id="facility-search" type="search" placeholder="Search by name or location" /></label>
+          <label>Facility type<select id="type-filter"><option value="all">All types</option><option>Study</option><option>Academic</option><option>Sports</option></select></label>
+          <label>Date<input type="date" value="2026-11-10" /></label>
+        </div>
+        <div id="facility-list" class="facility-grid"></div>
+      </section>
+
+      <section id="booking" class="screen" data-screen hidden>
+        <a class="back-link" href="#student-dashboard" data-route="student-dashboard">← Back to facilities</a>
+        <div class="booking-layout">
+          <article class="facility-summary">
+            <div class="facility-visual large" id="booking-icon">◫</div>
+            <p class="eyebrow" id="booking-type">ACADEMIC</p>
+            <h1 id="booking-name">Seminar Hall A</h1>
+            <p id="booking-description" class="muted">A presentation-ready space for talks, workshops, and society events.</p>
+            <dl class="details"><div><dt>Location</dt><dd id="booking-location">Main Block, Floor 2</dd></div><div><dt>Capacity</dt><dd id="booking-capacity">80 people</dd></div><div><dt>Facilities</dt><dd>Projector · Wi-Fi · Audio</dd></div></dl>
+          </article>
+          <form id="booking-form" class="booking-form card">
+            <h2>Request a booking</h2>
+            <label>Date<input name="date" type="date" value="2026-11-10" required /></label>
+            <div class="two-col"><label>Start time<select name="start" required><option>09:00</option><option>10:00</option><option>11:00</option><option>14:00</option><option>15:00</option></select></label><label>End time<select name="end" required><option>10:00</option><option>11:00</option><option>12:00</option><option>15:00</option><option>16:00</option></select></label></div>
+            <p class="availability"><span></span>Slots marked available are shown for planning only.</p>
+            <label>Booking purpose<textarea name="purpose" rows="4" placeholder="Briefly describe your activity" required></textarea></label>
+            <button class="button primary" type="submit">Submit booking request</button>
+            <p id="booking-message" class="status-message" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
+      <section id="my-bookings" class="screen" data-screen hidden>
+        <div class="page-heading"><div><p class="eyebrow">STUDENT DASHBOARD</p><h1>My bookings</h1><p class="muted">Requests stay pending until an administrator reviews them.</p></div><a class="button secondary" href="#student-dashboard" data-route="student-dashboard">Book a facility</a></div>
+        <div class="card table-wrap"><table><thead><tr><th>Facility</th><th>Date &amp; time</th><th>Purpose</th><th>Status</th><th></th></tr></thead><tbody id="student-bookings"></tbody></table></div>
+      </section>
+
+      <section id="admin-dashboard" class="screen" data-screen hidden>
+        <div class="page-heading"><div><p class="eyebrow">ADMIN DASHBOARD</p><h1>Booking management</h1><p class="muted">Review requests and keep campus facilities available.</p></div><button class="button secondary" id="add-facility" type="button">+ Add facility</button></div>
+        <div class="metrics"><article class="metric card"><span>Pending requests</span><strong id="pending-count">3</strong></article><article class="metric card"><span>Active facilities</span><strong>12</strong></article><article class="metric card"><span>Today’s bookings</span><strong>8</strong></article></div>
+        <div class="admin-grid"><article class="card table-wrap"><div class="card-heading"><h2>Requests awaiting review</h2><button class="text-button" type="button">View all</button></div><table><thead><tr><th>Requester</th><th>Facility</th><th>Time</th><th>Action</th></tr></thead><tbody id="admin-requests"></tbody></table></article><article class="card"><div class="card-heading"><h2>Facilities</h2><button class="text-button" type="button">Manage</button></div><ul id="admin-facilities" class="compact-list"></ul></article></div>
+      </section>
+    </main>
+    <footer>Day 2 UI prototype · Data shown is illustrative only; no server or database is connected.</footer>
+    <script src="app.js"></script>
+  </body>
+</html>
