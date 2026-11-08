@@ -1,0 +1,1 @@
+"""CampusReserve FastAPI application package."""

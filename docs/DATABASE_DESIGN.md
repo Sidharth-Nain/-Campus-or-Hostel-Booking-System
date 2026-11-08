@@ -64,7 +64,7 @@ pending ──approve──> approved
    └──cancel─> cancelled ◄──cancel (if policy permits)
 ```
 
-Only a future Day 3 API will enforce who can make each transition. The Day 2 schema ensures that an `approved` or `rejected` row has both review fields, while a `pending` or `cancelled` row does not.
+The later booking API will enforce who can make each transition. The Day 2 schema ensures that an `approved` or `rejected` row has both review fields, while a `pending` or `cancelled` row does not.
 
 ## Overlap rule
 

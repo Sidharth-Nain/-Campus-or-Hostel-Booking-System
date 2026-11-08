@@ -1,0 +1,14 @@
+# Python virtual environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local configuration and development databases
+.env
+*.db
+*.sqlite3
+
+# Editor and operating-system files
+.vscode/settings.json
+.DS_Store
