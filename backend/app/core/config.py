@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     app_name: str = "CampusReserve API"
     environment: str = "development"
     api_v1_prefix: str = "/api/v1"
-    database_url: str | None = None
+    # SQLite keeps local learning setup simple. PostgreSQL is enabled by DATABASE_URL.
+    database_url: str = "sqlite:///./campusreserve.db"
 
     # The static Day 2 prototype can be served from either common local port.
     cors_origins: str = "http://127.0.0.1:5500,http://localhost:5500,http://127.0.0.1:5173,http://localhost:5173"

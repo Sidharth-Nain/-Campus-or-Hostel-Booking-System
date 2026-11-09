@@ -1,6 +1,6 @@
 # Backend setup
 
-This directory contains the Day 3 FastAPI foundation. It exposes a health endpoint only. Authentication, database models, and booking routes are intentionally deferred to later days.
+This directory contains the FastAPI foundation and Day 4 database layer. It exposes health and read-only facility endpoints. Authentication, booking creation, approval, and conflict handling are intentionally deferred to later days.
 
 ## First-time setup
 
@@ -22,6 +22,7 @@ Then open these addresses in a browser:
 
 - `http://127.0.0.1:8000/` — service information
 - `http://127.0.0.1:8000/api/v1/health` — health check
+- `http://127.0.0.1:8000/api/v1/facilities` — seeded active facilities
 - `http://127.0.0.1:8000/docs` — interactive API documentation
 
-To prepare for PostgreSQL later, copy `backend/.env.example` to `backend/.env` and replace its placeholder connection string. Do not commit `.env` because it can contain passwords.
+The application uses a local SQLite file by default, so it works before PostgreSQL is installed. To use PostgreSQL, copy `backend/.env.example` to `backend/.env` and replace its placeholder connection string. Do not commit `.env` because it can contain passwords.
