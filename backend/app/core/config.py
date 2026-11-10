@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     # SQLite keeps local learning setup simple. PostgreSQL is enabled by DATABASE_URL.
     database_url: str = "sqlite:///./campusreserve.db"
+    jwt_secret_key: str = "local-development-secret-change-before-deploying"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
 
     # The static Day 2 prototype can be served from either common local port.
     cors_origins: str = "http://127.0.0.1:5500,http://localhost:5500,http://127.0.0.1:5173,http://localhost:5173"
