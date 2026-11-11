@@ -1,4 +1,4 @@
-"""Application entry point for the CampusReserve API."""
+"""Application entry point for the CampusFlow API."""
 
 from contextlib import asynccontextmanager
 
@@ -48,7 +48,7 @@ def root() -> dict[str, str]:
     """Provide a small landing response for a running local API."""
 
     return {
-        "message": "CampusReserve API is running.",
+        "message": "CampusFlow API is running.",
         "documentation": "/docs",
         "health_check": f"{settings.api_v1_prefix}/health",
     }

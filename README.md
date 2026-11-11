@@ -1,4 +1,4 @@
-# CampusReserve
+# CampusFlow
 
 ### Smart Campus Facility Booking & Management System
 
@@ -11,7 +11,7 @@
 
 ## 01. Project Overview
 
-CampusReserve is a web-based facility reservation and management platform designed to simplify how educational institutions manage shared campus resources.
+CampusFlow is a web-based facility reservation and management platform designed to simplify how educational institutions manage shared campus resources.
 
 The platform will provide a centralized system where students and faculty can explore available facilities, check booking availability, submit reservation requests, and monitor their booking status.
 
@@ -33,11 +33,11 @@ Managing reservations for these resources can become challenging when bookings r
 - **Lack of transparency:** Users may have difficulty tracking their reservation status.
 - **Inefficient record management:** Administrators may struggle to maintain accurate booking histories.
 
-CampusReserve aims to address these challenges through a unified booking and management system.
+CampusFlow aims to address these challenges through a unified booking and management system.
 
 ## 03. Our Approach
 
-CampusReserve will follow a request-and-approval booking model.
+CampusFlow will follow a request-and-approval booking model.
 
 Users will be able to browse campus facilities, select a preferred date and time, and submit a reservation request.
 
@@ -49,7 +49,7 @@ The application will prioritize three principles:
 2. **Reliability:** Consistent booking validation and conflict prevention.
 3. **Transparency:** Clear reservation statuses and accessible booking history.
 
-## 04. Who Will Use CampusReserve?
+## 04. Who Will Use CampusFlow?
 
 ### Student
 
@@ -166,7 +166,7 @@ The final technology choices may be adjusted based on deployment compatibility, 
 
 ## 07. System Architecture
 
-CampusReserve will use a client-server architecture with a separate frontend, backend API, and database.
+CampusFlow will use a client-server architecture with a separate frontend, backend API, and database.
 
 **Architecture Flow**
 
@@ -319,7 +319,7 @@ The user can view the final decision through their dashboard.
 ## 10. Planned Repository Organization
 
 ```text
-campusreserve/
+campusflow/
 |
 |-- frontend/
 |   |-- public/
@@ -374,7 +374,7 @@ The roadmap is a proposed implementation schedule and will be aligned with the o
 
 ## 12. Quality Assurance & Testing
 
-CampusReserve will be tested across functionality, validation, security, and usability.
+CampusFlow will be tested across functionality, validation, security, and usability.
 
 ### Functional Testing
 
@@ -434,7 +434,7 @@ The live application will be tested after deployment to verify communication bet
 
 ## 14. Development Principles
 
-CampusReserve will be developed with the following priorities:
+CampusFlow will be developed with the following priorities:
 
 1. Build a functional minimum viable product before introducing optional features.
 2. Keep frontend, backend, and database responsibilities clearly separated.
@@ -446,7 +446,7 @@ CampusReserve will be developed with the following priorities:
 
 ## 15. Success Criteria
 
-CampusReserve will be considered ready for its initial release when:
+CampusFlow will be considered ready for its initial release when:
 
 - Students and faculty can authenticate successfully.
 - Facilities can be browsed and selected.
@@ -460,7 +460,7 @@ CampusReserve will be considered ready for its initial release when:
 
 ## 16. Project Vision
 
-CampusReserve is intended to demonstrate how a practical institutional problem can be addressed through full-stack software development.
+CampusFlow is intended to demonstrate how a practical institutional problem can be addressed through full-stack software development.
 
 Beyond the challenge, the project has the potential to evolve into a campus-wide resource management platform with improved scheduling, automation, and facility utilization insights.
 
@@ -468,7 +468,7 @@ The final objective is to deliver a functional, understandable, and maintainable
 
 ---
 
-**CampusReserve — Making Campus Spaces Easier to Access.**
+**CampusFlow — Making Campus Spaces Easier to Access.**
 
 *Developed as part of ALTA BUILDER 30 | Track A — Full-Stack Development.*
 

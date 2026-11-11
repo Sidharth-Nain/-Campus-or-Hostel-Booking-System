@@ -1,1 +1,1 @@
-"""CampusReserve FastAPI application package."""
+"""CampusFlow FastAPI application package."""

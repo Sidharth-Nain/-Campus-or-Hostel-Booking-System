@@ -1,6 +1,6 @@
 # Backend setup
 
-This directory contains the FastAPI foundation, the database layer, and Day 5 authentication. It exposes health, read-only facility, registration, login, and current-user endpoints. Booking creation, approval, and conflict handling are intentionally deferred to later days.
+This directory contains the FastAPI foundation, database layer, authentication, and the Day 6 student booking workflow. It exposes health, facility, authentication, and protected booking endpoints. Administrator approval is intentionally deferred to the next milestone.
 
 ## First-time setup
 
@@ -30,5 +30,14 @@ Then open these addresses in a browser:
 - `POST /api/v1/auth/register` creates a student account. The password is stored only as a secure hash.
 - `POST /api/v1/auth/login` verifies the email and password, then returns a JWT access token.
 - `GET /api/v1/auth/me` returns the logged-in user's safe profile. In the API docs, click **Authorize** and paste the access token returned by login.
+
+## Student booking endpoints
+
+- `POST /api/v1/bookings` creates a pending facility request for the logged-in student.
+- `GET /api/v1/bookings` returns only that student's booking history.
+- `GET /api/v1/bookings/{booking_id}` returns one owned booking without exposing other students' data.
+- `PATCH /api/v1/bookings/{booking_id}/cancel` cancels an eligible pending or approved booking.
+
+Booking requests must be in the future, include a timezone, end after they start, and last no more than 12 hours. Approved reservations and a student's duplicate pending request block overlapping requests for the same facility.
 
 The application uses a local SQLite file by default, so it works before PostgreSQL is installed. To use PostgreSQL, copy `backend/.env.example` to `backend/.env` and replace its placeholder connection string. Do not commit `.env` because it can contain passwords.

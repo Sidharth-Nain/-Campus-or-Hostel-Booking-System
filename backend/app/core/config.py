@@ -9,11 +9,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Runtime configuration with safe defaults for local development."""
 
-    app_name: str = "CampusReserve API"
+    app_name: str = "CampusFlow API"
     environment: str = "development"
     api_v1_prefix: str = "/api/v1"
     # SQLite keeps local learning setup simple. PostgreSQL is enabled by DATABASE_URL.
-    database_url: str = "sqlite:///./campusreserve.db"
+    database_url: str = "sqlite:///./campusflow.db"
     jwt_secret_key: str = "local-development-secret-change-before-deploying"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60

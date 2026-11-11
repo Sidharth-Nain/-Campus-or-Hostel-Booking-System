@@ -1,4 +1,4 @@
-"""Database models for CampusReserve."""
+"""Database models for CampusFlow."""
 
 from app.models.entities import Booking, BookingStatus, Facility, User, UserRole
 
