@@ -3,9 +3,10 @@
 from datetime import datetime, timedelta, timezone
 from typing import Self
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
 from app.models import BookingStatus
+from app.schemas.facility import FacilityRead
 
 
 class BookingCreate(BaseModel):
@@ -53,3 +54,23 @@ class BookingRead(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BookingRequesterRead(BaseModel):
+    """Student identity shown to an administrator reviewing a request."""
+
+    id: int
+    full_name: str
+    email: EmailStr
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AdminBookingRead(BookingRead):
+    """Expanded booking information for the administrator review queue."""
+
+    user_id: int
+    requester: BookingRequesterRead
+    facility: FacilityRead
+    reviewed_by: int | None
+    reviewed_at: datetime | None

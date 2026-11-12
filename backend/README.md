@@ -1,6 +1,6 @@
 # Backend setup
 
-This directory contains the FastAPI foundation, database layer, authentication, and the Day 6 student booking workflow. It exposes health, facility, authentication, and protected booking endpoints. Administrator approval is intentionally deferred to the next milestone.
+This directory contains the FastAPI foundation, database layer, authentication, student booking workflow, and Day 7 administrator review workflow. It exposes health, facility, authentication, protected student booking, and admin-only decision endpoints.
 
 ## First-time setup
 
@@ -39,5 +39,19 @@ Then open these addresses in a browser:
 - `PATCH /api/v1/bookings/{booking_id}/cancel` cancels an eligible pending or approved booking.
 
 Booking requests must be in the future, include a timezone, end after they start, and last no more than 12 hours. Approved reservations and a student's duplicate pending request block overlapping requests for the same facility.
+
+## Administrator booking endpoints
+
+- `GET /api/v1/admin/bookings` returns pending requests by default. Use `?status=approved`, `?status=rejected`, or `?status=all` to review other records.
+- `PATCH /api/v1/admin/bookings/{booking_id}/approve` approves an available pending request.
+- `PATCH /api/v1/admin/bookings/{booking_id}/reject` rejects a pending request.
+
+Public registration always creates a student account. To make an existing local account an administrator, run this from the project root in a second VS Code terminal:
+
+```bash
+.venv/bin/python backend/scripts/promote_admin.py admin@campus.edu
+```
+
+Replace the example email with an account that was already registered through the API. Admin endpoints return `403` for student accounts. Approval checks for an existing approved overlap, and the PostgreSQL exclusion constraint remains the final concurrency protection during deployment.
 
 The application uses a local SQLite file by default, so it works before PostgreSQL is installed. To use PostgreSQL, copy `backend/.env.example` to `backend/.env` and replace its placeholder connection string. Do not commit `.env` because it can contain passwords.
