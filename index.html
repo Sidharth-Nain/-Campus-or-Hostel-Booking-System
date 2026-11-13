@@ -3,29 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Day 2 interface prototype for CampusFlow." />
+    <meta name="description" content="CampusFlow makes campus spaces easier to discover, request, and manage." />
     <title>CampusFlow | Facility Booking</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="topbar">
       <a class="brand" href="#student-dashboard" aria-label="CampusFlow home">
-        <span class="brand-mark">CF</span><span>CampusFlow</span>
+        <span class="brand-mark">CF</span><span>CampusFlow</span><small>Space booking</small>
       </a>
       <nav aria-label="Primary navigation">
         <a href="#student-dashboard" data-route="student-dashboard">Explore</a>
         <a href="#my-bookings" data-route="my-bookings">My bookings</a>
         <a href="#admin-dashboard" data-route="admin-dashboard">Admin preview</a>
       </nav>
-      <a class="avatar" href="#login" data-route="login" aria-label="Open sign in">AS</a>
+      <a class="avatar" href="#login" data-route="login" aria-label="Open sign in"><span>AS</span><small>Account</small></a>
     </header>
 
     <main>
       <section id="login" class="screen auth-screen" data-screen>
         <div class="auth-card">
-          <p class="eyebrow">CAMPUS FACILITY BOOKING</p>
-          <h1>Welcome to CampusFlow</h1>
-          <p class="muted">Sign in to book spaces, or create a student account.</p>
+          <a class="auth-brand" href="#student-dashboard"><span class="brand-mark">CF</span> CampusFlow</a>
+          <p class="eyebrow">YOUR CAMPUS, IN FLOW</p>
+          <h1>Make room for what matters.</h1>
+          <p class="muted">Sign in to find, request, and manage the spaces that move campus life forward.</p>
           <div class="tab-list" role="tablist" aria-label="Authentication option">
             <button class="tab active" data-auth-tab="signin" role="tab">Sign in</button>
             <button class="tab" data-auth-tab="signup" role="tab">Create account</button>
@@ -40,21 +41,30 @@
           <p id="auth-message" class="status-message" aria-live="polite"></p>
         </div>
         <aside class="auth-aside">
-          <span class="icon-box">▣</span>
-          <h2>Find the right space for your next idea.</h2>
-          <p>Browse labs, halls, libraries, and sports facilities in one place.</p>
+          <div class="auth-aside-content">
+            <span class="photo-label">ONE CAMPUS · EVERY SPACE</span>
+            <h2>From quiet study sessions to big campus moments.</h2>
+            <p>Explore real spaces, see the details that matter, and send a request in minutes.</p>
+            <div class="auth-proof"><strong>12+</strong><span>campus spaces<br />ready to discover</span></div>
+          </div>
         </aside>
       </section>
 
       <section id="student-dashboard" class="screen" data-screen hidden>
-        <div class="page-heading">
-          <div><p class="eyebrow">STUDENT DASHBOARD</p><h1>Find a campus facility</h1><p class="muted">See availability and submit a booking request.</p></div>
-          <a class="button secondary" href="#my-bookings" data-route="my-bookings">My bookings</a>
+        <div class="dashboard-hero">
+          <div class="hero-copy"><p class="eyebrow">GOOD AFTERNOON, AARAV · STUDENT SPACE DIRECTORY</p><h1>Where will your next idea <em>take shape?</em></h1><p>Find the right room, field, or studio for the work you want to do next.</p><div class="hero-actions"><a class="button primary" href="#facility-list">Explore spaces</a><a class="button ghost" href="#my-bookings" data-route="my-bookings">View my requests</a></div></div>
+          <div class="hero-note"><span>THIS WEEK</span><strong>38</strong><p>open booking windows across campus</p></div>
         </div>
+        <section class="student-overview" aria-labelledby="overview-title">
+          <div class="overview-intro"><p class="eyebrow">YOUR CAMPUS DAY</p><h2 id="overview-title">Everything important, at a glance.</h2></div>
+          <article class="next-booking-card"><div class="overview-icon">✓</div><div><small>NEXT CONFIRMED BOOKING</small><strong id="next-booking-facility">Central Library Study Room</strong><p id="next-booking-time">18 Nov · 09:00–10:00</p></div><a href="#my-bookings" data-route="my-bookings" aria-label="View my confirmed booking">View details →</a></article>
+          <article class="request-summary-card"><span>AWAITING REVIEW</span><strong id="student-pending-count">0</strong><p>booking requests</p><a href="#my-bookings" data-route="my-bookings">Track requests</a></article>
+        </section>
+        <div class="section-heading"><div><p class="eyebrow">EXPLORE CAMPUS</p><h2>Spaces for every kind of day</h2></div><p>Search by place, purpose, or the time you need.</p></div>
         <div class="filter-bar" aria-label="Facility filters">
           <label>Search<input id="facility-search" type="search" placeholder="Search by name or location" /></label>
           <label>Facility type<select id="type-filter"><option value="all">All types</option><option>Study</option><option>Academic</option><option>Sports</option></select></label>
-          <label>Date<input type="date" value="2026-11-10" /></label>
+          <label>Date<input type="date" value="2026-11-17" /></label>
         </div>
         <div id="facility-list" class="facility-grid"></div>
       </section>
@@ -63,7 +73,7 @@
         <a class="back-link" href="#student-dashboard" data-route="student-dashboard">← Back to facilities</a>
         <div class="booking-layout">
           <article class="facility-summary">
-            <div class="facility-visual large" id="booking-icon">◫</div>
+            <div class="facility-visual large"><img id="booking-image" src="assets/images/seminar-hall.jpg" alt="Seminar Hall A" /><span class="image-badge" id="booking-icon">◫</span></div>
             <p class="eyebrow" id="booking-type">ACADEMIC</p>
             <h1 id="booking-name">Seminar Hall A</h1>
             <p id="booking-description" class="muted">A presentation-ready space for talks, workshops, and society events.</p>
@@ -71,9 +81,21 @@
           </article>
           <form id="booking-form" class="booking-form card">
             <h2>Request a booking</h2>
-            <label>Date<input name="date" type="date" value="2026-11-10" required /></label>
-            <div class="two-col"><label>Start time<select name="start" required><option>09:00</option><option>10:00</option><option>11:00</option><option>14:00</option><option>15:00</option></select></label><label>End time<select name="end" required><option>10:00</option><option>11:00</option><option>12:00</option><option>15:00</option><option>16:00</option></select></label></div>
-            <p class="availability"><span></span>Slots marked available are shown for planning only.</p>
+            <label>Date<input name="date" type="date" value="2026-11-17" required /></label>
+            <fieldset class="time-picker">
+              <legend>Choose an available time</legend>
+              <div class="time-slot-grid" role="group" aria-label="Available one-hour time slots">
+                <button class="time-slot selected" type="button" data-start="09:00" data-end="10:00" aria-pressed="true"><strong>09:00</strong><span>– 10:00</span></button>
+                <button class="time-slot" type="button" data-start="10:00" data-end="11:00" aria-pressed="false"><strong>10:00</strong><span>– 11:00</span></button>
+                <button class="time-slot" type="button" data-start="11:00" data-end="12:00" aria-pressed="false"><strong>11:00</strong><span>– 12:00</span></button>
+                <button class="time-slot unavailable" type="button" disabled><strong>12:00</strong><span>Booked</span></button>
+                <button class="time-slot" type="button" data-start="14:00" data-end="15:00" aria-pressed="false"><strong>14:00</strong><span>– 15:00</span></button>
+                <button class="time-slot" type="button" data-start="15:00" data-end="16:00" aria-pressed="false"><strong>15:00</strong><span>– 16:00</span></button>
+              </div>
+              <input type="hidden" name="start" value="09:00" />
+              <input type="hidden" name="end" value="10:00" />
+              <p class="slot-feedback"><span></span><strong id="selected-slot">09:00–10:00 selected</strong></p>
+            </fieldset>
             <label>Booking purpose<textarea name="purpose" rows="4" placeholder="Briefly describe your activity" required></textarea></label>
             <button class="button primary" type="submit">Submit booking request</button>
             <p id="booking-message" class="status-message" aria-live="polite"></p>
@@ -87,12 +109,12 @@
       </section>
 
       <section id="admin-dashboard" class="screen" data-screen hidden>
-        <div class="page-heading"><div><p class="eyebrow">ADMIN DASHBOARD</p><h1>Booking management</h1><p class="muted">Review requests and keep campus facilities available.</p></div><button class="button secondary" id="add-facility" type="button">+ Add facility</button></div>
-        <div class="metrics"><article class="metric card"><span>Pending requests</span><strong id="pending-count">3</strong></article><article class="metric card"><span>Active facilities</span><strong>12</strong></article><article class="metric card"><span>Today’s bookings</span><strong>8</strong></article></div>
+        <div class="admin-banner"><div><p class="eyebrow">ADMIN WORKSPACE</p><h1>Keep the campus moving.</h1><p>Review demand, protect availability, and make decisions with context.</p></div><button class="button light" id="add-facility" type="button">+ Add facility</button></div>
+        <div class="metrics"><article class="metric card"><span class="metric-icon">↗</span><div><small>Pending requests</small><strong id="pending-count">3</strong><p>Needs attention</p></div></article><article class="metric card"><span class="metric-icon">⌂</span><div><small>Active facilities</small><strong>12</strong><p>Across 4 zones</p></div></article><article class="metric card"><span class="metric-icon">◷</span><div><small>Today’s bookings</small><strong>8</strong><p>67% utilization</p></div></article></div>
         <div class="admin-grid"><article class="card table-wrap"><div class="card-heading"><h2>Requests awaiting review</h2><button class="text-button" type="button">View all</button></div><table><thead><tr><th>Requester</th><th>Facility</th><th>Time</th><th>Action</th></tr></thead><tbody id="admin-requests"></tbody></table></article><article class="card"><div class="card-heading"><h2>Facilities</h2><button class="text-button" type="button">Manage</button></div><ul id="admin-facilities" class="compact-list"></ul></article></div>
       </section>
     </main>
-    <footer>Day 2 UI prototype · Data shown is illustrative only; no server or database is connected.</footer>
+    <footer><div><strong>CampusFlow</strong><span>Making campus spaces easier to access.</span></div><p>Interface preview · Sample data for design review</p></footer>
     <script src="app.js"></script>
   </body>
 </html>
