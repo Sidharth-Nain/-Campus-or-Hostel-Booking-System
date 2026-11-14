@@ -4,7 +4,7 @@
 
 **Project:** ALTA BUILDER 30 | Track A — Full-Stack Development
 **Duration:** 15 Days
-**Development Stage:** Planning & Architecture
+**Development Stage:** Frontend authentication integration
 **Project Type:** Full-Stack Web Application
 
 ---
@@ -163,6 +163,27 @@ Potential improvements beyond the initial challenge:
 | Render                | Planned backend hosting               |
 
 The final technology choices may be adjusted based on deployment compatibility, development constraints, and project requirements.
+
+## Running the current application
+
+CampusFlow now has a React frontend in `frontend/` and a FastAPI backend in `backend/`. Start them in two VS Code terminals.
+
+**Terminal 1 — backend:**
+
+```bash
+source .venv/bin/activate
+uvicorn app.main:app --app-dir backend --reload
+```
+
+**Terminal 2 — frontend:**
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://127.0.0.1:5173`. The React app includes registration, login, JWT session restoration, logout, protected routing, and a shared CampusFlow layout. Facility list and detail pages will be connected to live API data in the next scheduled frontend task.
 
 ## 07. System Architecture
 
