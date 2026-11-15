@@ -1,6 +1,6 @@
 # CampusFlow React frontend
 
-This is the active CampusFlow frontend. It currently includes the Day 9 frontend foundation: React setup, hash-based routing, a shared layout, registration, login, session restoration, logout, and a protected student dashboard.
+This is the active CampusFlow frontend. It includes React setup, hash-based routing, a shared layout, registration, login, session restoration, logout, a protected student dashboard, and Day 10 facility list/detail pages backed by live FastAPI data.
 
 The original root-level HTML/CSS/JavaScript files remain as the UI prototype and design reference.
 
@@ -38,6 +38,8 @@ Open `http://127.0.0.1:5173` in the browser.
 - `#/register` creates a student through `POST /api/v1/auth/register` and signs them in.
 - `#/login` signs in through `POST /api/v1/auth/login`.
 - `#/dashboard` is protected and loads the profile through `GET /api/v1/auth/me`.
+- `#/facilities` loads active spaces through `GET /api/v1/facilities`.
+- `#/facilities/:id` loads one space through `GET /api/v1/facilities/{id}`.
 
 The JWT is stored in local storage for this learning project. Logging out removes it.
 

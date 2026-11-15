@@ -4,7 +4,7 @@
 
 **Project:** ALTA BUILDER 30 | Track A — Full-Stack Development
 **Duration:** 15 Days
-**Development Stage:** Frontend authentication integration
+**Development Stage:** Frontend live-data integration
 **Project Type:** Full-Stack Web Application
 
 ---
@@ -183,7 +183,7 @@ npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173`. The React app includes registration, login, JWT session restoration, logout, protected routing, and a shared CampusFlow layout. Facility list and detail pages will be connected to live API data in the next scheduled frontend task.
+Open `http://127.0.0.1:5173`. The React app includes registration, login, JWT session restoration, logout, protected routing, a shared CampusFlow layout, and facility list/detail screens backed by live FastAPI data.
 
 ## 07. System Architecture
 

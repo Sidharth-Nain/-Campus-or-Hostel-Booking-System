@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import { RouteLink } from "../components/AppLayout";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -22,9 +23,10 @@ export default function DashboardPage() {
           <span className="role-badge">{user.role}</span>
         </article>
         <article className="next-step-card card">
-          <p className="eyebrow">NEXT PROJECT STEP</p>
-          <h2>Live facility screens</h2>
-          <p>The facility list and detail screens will be connected to API data in the next scheduled frontend task.</p>
+          <p className="eyebrow">LIVE CAMPUS DIRECTORY</p>
+          <h2>Find your next space</h2>
+          <p>Browse active campus facilities loaded directly from the FastAPI database.</p>
+          <RouteLink className="inline-link" to="/facilities">Explore facilities →</RouteLink>
         </article>
       </div>
       <p className="api-note">Connected locally to <code>{API_BASE_URL}</code></p>

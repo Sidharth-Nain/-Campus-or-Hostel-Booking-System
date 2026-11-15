@@ -9,13 +9,15 @@ function readableError(detail) {
 }
 
 async function apiRequest(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
+  const headers = { ...options.headers };
+  if (options.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
+
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  } catch {
+    throw new Error("CampusFlow API is not reachable. Make sure the FastAPI terminal is running.");
+  }
 
   const data = await response.json().catch(() => null);
   if (!response.ok) {
@@ -42,6 +44,14 @@ export function getCurrentUser(token) {
   return apiRequest("/auth/me", {
     headers: { Authorization: `Bearer ${token}` },
   });
+}
+
+export function getFacilities() {
+  return apiRequest("/facilities");
+}
+
+export function getFacility(facilityId) {
+  return apiRequest(`/facilities/${facilityId}`);
 }
 
 export { API_BASE_URL };

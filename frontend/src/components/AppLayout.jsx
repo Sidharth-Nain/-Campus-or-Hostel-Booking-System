@@ -1,5 +1,5 @@
 import { useAuth } from "../auth/AuthContext";
-import { navigate } from "../router";
+import { navigate, useRoute } from "../router";
 
 function RouteLink({ children, className = "", to }) {
   return (
@@ -18,6 +18,7 @@ function RouteLink({ children, className = "", to }) {
 
 export default function AppLayout({ children }) {
   const { isAuthenticated, signOut, user } = useAuth();
+  const route = useRoute();
 
   function handleSignOut() {
     signOut();
@@ -35,7 +36,8 @@ export default function AppLayout({ children }) {
         <nav aria-label="Primary navigation">
           {isAuthenticated ? (
             <>
-              <RouteLink to="/dashboard">Dashboard</RouteLink>
+              <RouteLink className={route === "/dashboard" ? "active" : ""} to="/dashboard">Dashboard</RouteLink>
+              <RouteLink className={route.startsWith("/facilities") ? "active" : ""} to="/facilities">Facilities</RouteLink>
               <button className="nav-button" type="button" onClick={handleSignOut}>Sign out</button>
             </>
           ) : (
@@ -55,7 +57,7 @@ export default function AppLayout({ children }) {
       <main>{children}</main>
       <footer>
         <div><strong>CampusFlow</strong><span>Making campus spaces easier to access.</span></div>
-        <p>React frontend · FastAPI authentication</p>
+        <p>React frontend · Live FastAPI data</p>
       </footer>
     </div>
   );
