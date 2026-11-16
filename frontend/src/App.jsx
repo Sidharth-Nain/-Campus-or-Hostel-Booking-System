@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { useAuth } from "./auth/AuthContext";
 import AppLayout from "./components/AppLayout";
+import AdminFacilitiesPage from "./pages/AdminFacilitiesPage";
 import DashboardPage from "./pages/DashboardPage";
 import FacilityDetailPage from "./pages/FacilityDetailPage";
 import FacilityListPage from "./pages/FacilityListPage";
@@ -15,7 +16,7 @@ export default function App() {
 
   useEffect(() => {
     if (checkingSession) return;
-    const protectedRoute = route === "/dashboard" || route === "/facilities" || /^\/facilities\/\d+$/.test(route);
+    const protectedRoute = route === "/dashboard" || route === "/facilities" || route === "/admin/facilities" || /^\/facilities\/\d+$/.test(route);
     const knownRoute = protectedRoute || route === "/login" || route === "/register";
     if (protectedRoute && !isAuthenticated) navigate("/login");
     if ((route === "/login" || route === "/register") && isAuthenticated) navigate("/dashboard");
@@ -33,6 +34,7 @@ export default function App() {
   if (route === "/register" && !isAuthenticated) page = <RegisterPage />;
   if (route === "/dashboard" && isAuthenticated) page = <DashboardPage />;
   if (route === "/facilities" && isAuthenticated) page = <FacilityListPage />;
+  if (route === "/admin/facilities" && isAuthenticated) page = <AdminFacilitiesPage />;
   if (/^\/facilities\/\d+$/.test(route) && isAuthenticated) {
     page = <FacilityDetailPage facilityId={route.split("/").at(-1)} />;
   }

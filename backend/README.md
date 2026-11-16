@@ -1,6 +1,6 @@
 # Backend setup
 
-This directory contains the FastAPI foundation, database layer, authentication, student booking workflow, and Day 7 administrator review workflow. It exposes health, facility, authentication, protected student booking, and admin-only decision endpoints.
+This directory contains the FastAPI foundation, database layer, authentication, student booking workflow, administrator review workflow, and Day 11 facility-management API. It exposes health, public facility, authentication, protected student booking, and admin-only management endpoints.
 
 ## First-time setup
 
@@ -53,5 +53,14 @@ Public registration always creates a student account. To make an existing local 
 ```
 
 Replace the example email with an account that was already registered through the API. Admin endpoints return `403` for student accounts. Approval checks for an existing approved overlap, and the PostgreSQL exclusion constraint remains the final concurrency protection during deployment.
+
+## Administrator facility endpoints
+
+- `GET /api/v1/admin/facilities` returns active and inactive facilities.
+- `POST /api/v1/admin/facilities` creates an active facility after validating its name, location, capacity, and description.
+- `PATCH /api/v1/admin/facilities/{facility_id}` edits a facility or restores it with `{"is_active": true}`.
+- `DELETE /api/v1/admin/facilities/{facility_id}` safely deactivates a facility.
+
+Deactivation is intentionally used instead of permanent deletion. It removes the facility from student-facing endpoints while preserving any booking history linked to it. Duplicate name-and-location combinations return `409`, and student accounts receive `403` on every management endpoint.
 
 The application uses a local SQLite file by default, so it works before PostgreSQL is installed. To use PostgreSQL, copy `backend/.env.example` to `backend/.env` and replace its placeholder connection string. Do not commit `.env` because it can contain passwords.

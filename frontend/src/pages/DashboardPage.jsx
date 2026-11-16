@@ -10,7 +10,7 @@ export default function DashboardPage() {
     <section className="dashboard-page">
       <div className="dashboard-hero">
         <div>
-          <p className="eyebrow">AUTHENTICATED STUDENT AREA</p>
+          <p className="eyebrow">AUTHENTICATED {user.role === "admin" ? "ADMINISTRATOR" : "STUDENT"} AREA</p>
           <h1>Good to see you, <em>{firstName}.</em></h1>
           <p>Your React frontend is connected to the CampusFlow API and your session is protected with a JWT.</p>
         </div>
@@ -23,10 +23,12 @@ export default function DashboardPage() {
           <span className="role-badge">{user.role}</span>
         </article>
         <article className="next-step-card card">
-          <p className="eyebrow">LIVE CAMPUS DIRECTORY</p>
-          <h2>Find your next space</h2>
-          <p>Browse active campus facilities loaded directly from the FastAPI database.</p>
-          <RouteLink className="inline-link" to="/facilities">Explore facilities →</RouteLink>
+          <p className="eyebrow">{user.role === "admin" ? "DIRECTORY CONTROLS" : "LIVE CAMPUS DIRECTORY"}</p>
+          <h2>{user.role === "admin" ? "Manage campus spaces" : "Find your next space"}</h2>
+          <p>{user.role === "admin" ? "Create, update, deactivate, or restore facilities from one protected workspace." : "Browse active campus facilities loaded directly from the FastAPI database."}</p>
+          <RouteLink className="inline-link" to={user.role === "admin" ? "/admin/facilities" : "/facilities"}>
+            {user.role === "admin" ? "Open facility manager →" : "Explore facilities →"}
+          </RouteLink>
         </article>
       </div>
       <p className="api-note">Connected locally to <code>{API_BASE_URL}</code></p>

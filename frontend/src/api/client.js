@@ -54,4 +54,35 @@ export function getFacility(facilityId) {
   return apiRequest(`/facilities/${facilityId}`);
 }
 
+function adminHeaders(token) {
+  return { Authorization: `Bearer ${token}` };
+}
+
+export function getAdminFacilities(token) {
+  return apiRequest("/admin/facilities", { headers: adminHeaders(token) });
+}
+
+export function createFacility(token, payload) {
+  return apiRequest("/admin/facilities", {
+    method: "POST",
+    headers: adminHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateFacility(token, facilityId, payload) {
+  return apiRequest(`/admin/facilities/${facilityId}`, {
+    method: "PATCH",
+    headers: adminHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deactivateFacility(token, facilityId) {
+  return apiRequest(`/admin/facilities/${facilityId}`, {
+    method: "DELETE",
+    headers: adminHeaders(token),
+  });
+}
+
 export { API_BASE_URL };

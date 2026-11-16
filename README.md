@@ -4,7 +4,7 @@
 
 **Project:** ALTA BUILDER 30 | Track A — Full-Stack Development
 **Duration:** 15 Days
-**Development Stage:** Frontend live-data integration
+**Development Stage:** Full facility management from the React interface
 **Project Type:** Full-Stack Web Application
 
 ---
@@ -183,7 +183,15 @@ npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173`. The React app includes registration, login, JWT session restoration, logout, protected routing, a shared CampusFlow layout, and facility list/detail screens backed by live FastAPI data.
+Open `http://127.0.0.1:5173`. The React app includes registration, login, JWT session restoration, logout, protected routing, a shared CampusFlow layout, facility list/detail screens, and an administrator facility-management workspace backed by live FastAPI data.
+
+To use the administrator workspace, first register an account and then promote it from the project root:
+
+```bash
+.venv/bin/python backend/scripts/promote_admin.py your@email.com
+```
+
+Sign in again and open **Manage** in the navigation. Administrators can create, edit, deactivate, and restore facilities. Deactivation keeps existing booking records safe while hiding the facility from student pages.
 
 ## 07. System Architecture
 
@@ -240,7 +248,12 @@ Example planned endpoints:
 | POST   | `/bookings`                   | Submit a reservation        |
 | GET    | `/bookings/me`                | Retrieve user bookings      |
 | PATCH  | `/bookings/{id}/cancel`       | Cancel an eligible booking  |
-| PATCH  | `/admin/bookings/{id}/status` | Approve or reject a request |
+| PATCH  | `/admin/bookings/{id}/approve` | Approve a request            |
+| PATCH  | `/admin/bookings/{id}/reject`  | Reject a request             |
+| GET    | `/admin/facilities`             | List managed facilities      |
+| POST   | `/admin/facilities`             | Create a facility            |
+| PATCH  | `/admin/facilities/{id}`        | Update or restore a facility |
+| DELETE | `/admin/facilities/{id}`        | Deactivate a facility        |
 
 These endpoints represent the proposed API contract and may evolve during implementation.
 
