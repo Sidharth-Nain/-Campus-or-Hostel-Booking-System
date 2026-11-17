@@ -4,7 +4,7 @@
 
 **Project:** ALTA BUILDER 30 | Track A — Full-Stack Development
 **Duration:** 15 Days
-**Development Stage:** Full facility management from the React interface
+**Development Stage:** Heavy booking feature — backend conflict prevention
 **Project Type:** Full-Stack Web Application
 
 ---
@@ -246,7 +246,8 @@ Example planned endpoints:
 | GET    | `/facilities`                 | Retrieve facilities         |
 | GET    | `/facilities/{id}`            | Retrieve facility details   |
 | POST   | `/bookings`                   | Submit a reservation        |
-| GET    | `/bookings/me`                | Retrieve user bookings      |
+| POST   | `/bookings/check-availability` | Check a proposed time slot  |
+| GET    | `/bookings`                   | Retrieve user bookings      |
 | PATCH  | `/bookings/{id}/cancel`       | Cancel an eligible booking  |
 | PATCH  | `/admin/bookings/{id}/approve` | Approve a request            |
 | PATCH  | `/admin/bookings/{id}/reject`  | Reject a request             |

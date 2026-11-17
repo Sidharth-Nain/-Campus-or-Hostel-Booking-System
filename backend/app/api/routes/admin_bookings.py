@@ -12,6 +12,7 @@ from app.api.deps import get_current_admin
 from app.database import get_db
 from app.models import Booking, BookingStatus, Facility, User
 from app.schemas.booking import AdminBookingRead
+from app.services.booking_conflicts import approved_conflict_id
 
 
 router = APIRouter(prefix="/admin/bookings")
@@ -88,16 +89,12 @@ def approve_booking(
             detail="This facility is no longer active.",
         )
 
-    conflict = database.scalar(
-        select(Booking.id)
-        .where(
-            Booking.id != booking.id,
-            Booking.facility_id == booking.facility_id,
-            Booking.status == BookingStatus.APPROVED,
-            Booking.starts_at < booking.ends_at,
-            Booking.ends_at > booking.starts_at,
-        )
-        .limit(1)
+    conflict = approved_conflict_id(
+        database,
+        booking.facility_id,
+        booking.starts_at,
+        booking.ends_at,
+        exclude_booking_id=booking.id,
     )
     if conflict is not None:
         raise HTTPException(

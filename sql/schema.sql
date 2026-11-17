@@ -63,6 +63,6 @@ CREATE INDEX bookings_facility_time_idx ON bookings (facility_id, starts_at, end
 CREATE INDEX bookings_user_created_idx ON bookings (user_id, created_at DESC);
 CREATE INDEX bookings_pending_review_idx ON bookings (created_at) WHERE status = 'pending';
 
--- Day 3 application rule:
--- before approving a pending request, the API must lock/check the requested interval
--- and gracefully report an exclusion-constraint conflict if another approval wins.
+-- Day 12 application rule:
+-- the API checks the requested interval before approval and gracefully reports
+-- an exclusion-constraint conflict if another approval wins concurrently.

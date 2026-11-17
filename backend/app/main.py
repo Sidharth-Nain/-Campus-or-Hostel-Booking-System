@@ -9,6 +9,7 @@ from app.api.router import api_router
 from app.core.config import get_settings
 from app.database import Base, SessionLocal, engine
 from app.models import Facility  # Import models before metadata is created.
+from app.services.database_guards import ensure_postgres_booking_guards
 from app.services.seed import seed_facilities
 
 
@@ -20,6 +21,7 @@ async def lifespan(_: FastAPI):
     """Create local tables and starter facilities when the API starts."""
 
     Base.metadata.create_all(bind=engine)
+    ensure_postgres_booking_guards(engine)
     with SessionLocal() as database:
         seed_facilities(database)
     yield

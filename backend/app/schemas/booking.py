@@ -9,23 +9,11 @@ from app.models import BookingStatus
 from app.schemas.facility import FacilityRead
 
 
-class BookingCreate(BaseModel):
-    """A student's request for one facility and time interval."""
+class BookingInterval(BaseModel):
+    """A validated future time range used by booking operations."""
 
-    facility_id: int = Field(gt=0)
     starts_at: datetime
     ends_at: datetime
-    purpose: str = Field(min_length=3, max_length=500)
-
-    @field_validator("purpose")
-    @classmethod
-    def clean_purpose(cls, value: str) -> str:
-        """Remove surrounding whitespace and reject an empty reason."""
-
-        cleaned = value.strip()
-        if len(cleaned) < 3:
-            raise ValueError("Purpose must contain at least 3 characters.")
-        return cleaned
 
     @model_validator(mode="after")
     def validate_booking_interval(self) -> Self:
@@ -40,6 +28,39 @@ class BookingCreate(BaseModel):
         if self.ends_at - self.starts_at > timedelta(hours=12):
             raise ValueError("A booking cannot be longer than 12 hours.")
         return self
+
+
+class BookingCreate(BookingInterval):
+    """A student's request for one facility and time interval."""
+
+    facility_id: int = Field(gt=0)
+    purpose: str = Field(min_length=3, max_length=500)
+
+    @field_validator("purpose")
+    @classmethod
+    def clean_purpose(cls, value: str) -> str:
+        """Remove surrounding whitespace and reject an empty reason."""
+
+        cleaned = value.strip()
+        if len(cleaned) < 3:
+            raise ValueError("Purpose must contain at least 3 characters.")
+        return cleaned
+
+
+class BookingAvailabilityRequest(BookingInterval):
+    """A facility and interval the student wants to check before requesting."""
+
+    facility_id: int = Field(gt=0)
+
+
+class BookingAvailabilityRead(BaseModel):
+    """Privacy-safe availability result for the requested interval."""
+
+    facility_id: int
+    starts_at: datetime
+    ends_at: datetime
+    is_available: bool
+    message: str
 
 
 class BookingRead(BaseModel):

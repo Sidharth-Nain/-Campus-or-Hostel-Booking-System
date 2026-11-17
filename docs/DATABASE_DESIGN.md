@@ -2,7 +2,7 @@
 
 ## Scope
 
-The planned database is PostgreSQL. It contains the three Day 2 core entities: `users`, `facilities`, and `bookings`. The executable design is in [schema.sql](../sql/schema.sql). It is a schema plan, not a running Day 3 database service.
+The production database design targets PostgreSQL and contains three core entities: `users`, `facilities`, and `bookings`. The executable SQL design is in [schema.sql](../sql/schema.sql), while the running FastAPI application uses matching SQLAlchemy models and SQLite for simple local development.
 
 ## Entity relationship summary
 
@@ -64,7 +64,7 @@ pending ──approve──> approved
    └──cancel─> cancelled ◄──cancel (if policy permits)
 ```
 
-The later booking API will enforce who can make each transition. The Day 2 schema ensures that an `approved` or `rejected` row has both review fields, while a `pending` or `cancelled` row does not.
+The booking API enforces who can make each transition. The schema ensures that an `approved` or `rejected` row has both review fields, while a `pending` or `cancelled` row does not.
 
 ## Overlap rule
 
@@ -75,7 +75,13 @@ Two **approved** bookings for the same facility cannot overlap. The schema uses 
 - A booking from 10:00 to 11:00 conflicts with one from 10:30 to 11:30.
 - Pending, rejected, and cancelled requests do not block a time slot.
 
-`btree_gist` is enabled to allow the equality comparison on `facility_id` within the exclusion constraint. The Day 3 approval endpoint must still handle a constraint-violation response, because two staff members might approve competing requests at nearly the same time.
+`btree_gist` is enabled to allow the equality comparison on `facility_id` within the exclusion constraint. CampusFlow installs this PostgreSQL constraint during application startup and the approval endpoint handles its constraint-violation response, because two staff members might approve competing requests at nearly the same time.
+
+The Day 12 conflict service applies the same half-open interval rule to three backend paths:
+
+- Availability checks report whether an approved booking overlaps a proposed interval.
+- Booking creation blocks approved overlaps and prevents a student from submitting a duplicate overlapping request.
+- Administrator approval rechecks the interval immediately before saving the decision.
 
 ## Indexes and Day 3 implementation notes
 

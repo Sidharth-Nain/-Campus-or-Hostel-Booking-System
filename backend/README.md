@@ -1,6 +1,6 @@
 # Backend setup
 
-This directory contains the FastAPI foundation, database layer, authentication, student booking workflow, administrator review workflow, and Day 11 facility-management API. It exposes health, public facility, authentication, protected student booking, and admin-only management endpoints.
+This directory contains the FastAPI foundation, database layer, authentication, student booking workflow, administrator review workflow, facility management, and the Day 12 booking-conflict engine. It exposes health, public facility, authentication, protected student booking, and admin-only management endpoints.
 
 ## First-time setup
 
@@ -33,12 +33,15 @@ Then open these addresses in a browser:
 
 ## Student booking endpoints
 
+- `POST /api/v1/bookings/check-availability` checks a validated future interval without exposing another student's booking details.
 - `POST /api/v1/bookings` creates a pending facility request for the logged-in student.
 - `GET /api/v1/bookings` returns only that student's booking history.
 - `GET /api/v1/bookings/{booking_id}` returns one owned booking without exposing other students' data.
 - `PATCH /api/v1/bookings/{booking_id}/cancel` cancels an eligible pending or approved booking.
 
-Booking requests must be in the future, include a timezone, end after they start, and last no more than 12 hours. Approved reservations and a student's duplicate pending request block overlapping requests for the same facility.
+Booking requests must be in the future, include a timezone, end after they start, and last no more than 12 hours. Approved reservations block overlapping time slots. A student also cannot submit a second pending or approved request that overlaps their own request for the same facility. Adjacent slots are allowed because the end time is treated as exclusive.
+
+Overlap checks are shared by availability, request creation, and administrator approval so all three paths use the same rule. On PostgreSQL, application startup installs an exclusion constraint as the final concurrency guard. If two administrators approve overlapping requests at almost the same time, the database accepts only one and the API returns a clear `409` response for the other.
 
 ## Administrator booking endpoints
 

@@ -3,13 +3,19 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import and_, or_, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.database import get_db
 from app.models import Booking, BookingStatus, Facility, User, UserRole
-from app.schemas.booking import BookingCreate, BookingRead
+from app.schemas.booking import (
+    BookingAvailabilityRead,
+    BookingAvailabilityRequest,
+    BookingCreate,
+    BookingRead,
+)
+from app.services.booking_conflicts import approved_conflict_id, duplicate_student_request_id
 
 
 router = APIRouter(prefix="/bookings")
@@ -28,6 +34,53 @@ def get_owned_booking(booking_id: int, user_id: int, database: Session) -> Booki
     return booking
 
 
+def get_active_facility(facility_id: int, database: Session) -> Facility:
+    """Return a bookable facility or a consistent not-found response."""
+
+    facility = database.scalar(
+        select(Facility).where(
+            Facility.id == facility_id,
+            Facility.is_active.is_(True),
+        )
+    )
+    if facility is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Facility not found.")
+    return facility
+
+
+@router.post(
+    "/check-availability",
+    response_model=BookingAvailabilityRead,
+    summary="Check a facility time slot",
+)
+def check_booking_availability(
+    payload: BookingAvailabilityRequest,
+    database: DatabaseSession,
+    _: CurrentUser,
+) -> BookingAvailabilityRead:
+    """Tell the UI whether an interval overlaps an approved reservation."""
+
+    get_active_facility(payload.facility_id, database)
+    conflict = approved_conflict_id(
+        database,
+        payload.facility_id,
+        payload.starts_at,
+        payload.ends_at,
+    )
+    is_available = conflict is None
+    return BookingAvailabilityRead(
+        facility_id=payload.facility_id,
+        starts_at=payload.starts_at,
+        ends_at=payload.ends_at,
+        is_available=is_available,
+        message=(
+            "This time slot is available."
+            if is_available
+            else "An approved booking overlaps this time slot."
+        ),
+    )
+
+
 @router.post("", response_model=BookingRead, status_code=status.HTTP_201_CREATED, summary="Request a facility booking")
 def create_booking(
     payload: BookingCreate,
@@ -42,37 +95,29 @@ def create_booking(
             detail="Only student accounts can request bookings.",
         )
 
-    facility = database.scalar(
-        select(Facility).where(
-            Facility.id == payload.facility_id,
-            Facility.is_active.is_(True),
-        )
-    )
-    if facility is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Facility not found.")
+    get_active_facility(payload.facility_id, database)
 
-    # Approved reservations block everyone. A student's own pending request also
-    # blocks an identical overlapping request, preventing accidental duplicates.
-    conflict = database.scalar(
-        select(Booking.id)
-        .where(
-            Booking.facility_id == payload.facility_id,
-            Booking.starts_at < payload.ends_at,
-            Booking.ends_at > payload.starts_at,
-            or_(
-                Booking.status == BookingStatus.APPROVED,
-                and_(
-                    Booking.user_id == current_user.id,
-                    Booking.status == BookingStatus.PENDING,
-                ),
-            ),
-        )
-        .limit(1)
-    )
-    if conflict is not None:
+    if approved_conflict_id(
+        database,
+        payload.facility_id,
+        payload.starts_at,
+        payload.ends_at,
+    ) is not None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="This facility already has a conflicting booking or request.",
+            detail="An approved booking already occupies part of this time slot.",
+        )
+
+    if duplicate_student_request_id(
+        database,
+        current_user.id,
+        payload.facility_id,
+        payload.starts_at,
+        payload.ends_at,
+    ) is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You already have an overlapping request for this facility.",
         )
 
     booking = Booking(
