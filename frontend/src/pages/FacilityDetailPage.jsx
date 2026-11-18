@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 
 import { getFacility } from "../api/client";
+import { useAuth } from "../auth/AuthContext";
+import BookingPanel from "../components/BookingPanel";
 import { ErrorState, LoadingState } from "../components/PageState";
 import { RouteLink } from "../components/AppLayout";
 import { facilityImage } from "../facilityImages";
 
 export default function FacilityDetailPage({ facilityId }) {
+  const { user } = useAuth();
   const [facility, setFacility] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -47,9 +50,14 @@ export default function FacilityDetailPage({ facilityId }) {
             <div><dt>Location</dt><dd>{facility.location}</dd></div>
             <div><dt>Status</dt><dd>{facility.is_active ? "Open for requests" : "Unavailable"}</dd></div>
           </dl>
-          <div className="detail-next-step"><span>BOOKING FLOW</span><p>Time-slot selection and request submission will be connected in the next scheduled frontend task.</p></div>
+          {user.role === "student" ? (
+            <button className="button primary detail-book-button" type="button" onClick={() => document.getElementById("booking-form")?.scrollIntoView({ behavior: "smooth" })}>Request this facility</button>
+          ) : (
+            <RouteLink className="button primary detail-book-button" to="/admin/bookings">Review booking requests</RouteLink>
+          )}
         </article>
       </div>
+      <BookingPanel facility={facility} />
     </section>
   );
 }

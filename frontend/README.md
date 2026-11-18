@@ -1,6 +1,6 @@
 # CampusFlow React frontend
 
-This is the active CampusFlow frontend. It includes React setup, hash-based routing, a shared layout, registration, login, session restoration, logout, protected dashboards, Day 10 facility list/detail pages, and the Day 11 administrator facility-management workspace backed by live FastAPI data.
+This is the active CampusFlow frontend. It includes React setup, hash-based routing, a shared layout, authentication, protected dashboards, live facility pages, administrator facility management, and the complete Day 13 booking workflow backed by FastAPI data.
 
 The original root-level HTML/CSS/JavaScript files remain as the UI prototype and design reference.
 
@@ -40,7 +40,11 @@ Open `http://127.0.0.1:5173` in the browser.
 - `#/dashboard` is protected and loads the profile through `GET /api/v1/auth/me`.
 - `#/facilities` loads active spaces through `GET /api/v1/facilities`.
 - `#/facilities/:id` loads one space through `GET /api/v1/facilities/{id}`.
+- `#/bookings` shows a student's booking history and cancellation controls.
+- `#/admin/bookings` shows the administrator review queue with approval and rejection actions.
 - `#/admin/facilities` lets administrators create, edit, deactivate, and restore facilities through the protected admin API.
+
+Students can check a time slot and submit a request directly from a facility detail page. Administrators can approve or reject it from the request queue, and the student sees the new status after refreshing My bookings.
 
 The JWT is stored in local storage for this learning project. Logging out removes it.
 

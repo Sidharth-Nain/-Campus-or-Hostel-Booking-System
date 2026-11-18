@@ -38,9 +38,9 @@ export default function AppLayout({ children }) {
             <>
               <RouteLink className={route === "/dashboard" ? "active" : ""} to="/dashboard">Dashboard</RouteLink>
               <RouteLink className={route.startsWith("/facilities") ? "active" : ""} to="/facilities">Facilities</RouteLink>
-              {user.role === "admin" && (
-                <RouteLink className={route.startsWith("/admin") ? "active" : ""} to="/admin/facilities">Manage</RouteLink>
-              )}
+              {user.role === "student" && <RouteLink className={route === "/bookings" ? "active" : ""} to="/bookings">My bookings</RouteLink>}
+              {user.role === "admin" && <RouteLink className={route === "/admin/bookings" ? "active" : ""} to="/admin/bookings">Requests</RouteLink>}
+              {user.role === "admin" && <RouteLink className={route === "/admin/facilities" ? "active" : ""} to="/admin/facilities">Spaces</RouteLink>}
               <button className="nav-button" type="button" onClick={handleSignOut}>Sign out</button>
             </>
           ) : (

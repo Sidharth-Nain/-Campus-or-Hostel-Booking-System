@@ -1,6 +1,6 @@
 # Backend setup
 
-This directory contains the FastAPI foundation, database layer, authentication, student booking workflow, administrator review workflow, facility management, and the Day 12 booking-conflict engine. It exposes health, public facility, authentication, protected student booking, and admin-only management endpoints.
+This directory contains the FastAPI foundation, database layer, authentication, student booking workflow, administrator review workflow, facility management, conflict prevention, and Day 13 booking-decision notifications. It exposes health, public facility, authentication, protected student booking, and admin-only management endpoints.
 
 ## First-time setup
 
@@ -48,6 +48,8 @@ Overlap checks are shared by availability, request creation, and administrator a
 - `GET /api/v1/admin/bookings` returns pending requests by default. Use `?status=approved`, `?status=rejected`, or `?status=all` to review other records.
 - `PATCH /api/v1/admin/bookings/{booking_id}/approve` approves an available pending request.
 - `PATCH /api/v1/admin/bookings/{booking_id}/reject` rejects a pending request.
+
+Every approval or rejection queues a decision email after the database commit. During local development, CampusFlow prints a safe email preview in the FastAPI terminal. To send real email, add the SMTP settings from `.env.example` to `backend/.env`. Email failure is logged without undoing the administrator's saved decision.
 
 Public registration always creates a student account. To make an existing local account an administrator, run this from the project root in a second VS Code terminal:
 

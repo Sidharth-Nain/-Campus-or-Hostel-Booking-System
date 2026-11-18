@@ -4,7 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_current_user
 from app.database import get_db
@@ -27,7 +27,9 @@ def get_owned_booking(booking_id: int, user_id: int, database: Session) -> Booki
     """Find a booking belonging to the current user without exposing other users' data."""
 
     booking = database.scalar(
-        select(Booking).where(Booking.id == booking_id, Booking.user_id == user_id)
+        select(Booking)
+        .options(joinedload(Booking.facility))
+        .where(Booking.id == booking_id, Booking.user_id == user_id)
     )
     if booking is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found.")
@@ -130,8 +132,7 @@ def create_booking(
     )
     database.add(booking)
     database.commit()
-    database.refresh(booking)
-    return booking
+    return get_owned_booking(booking.id, current_user.id, database)
 
 
 @router.get("", response_model=list[BookingRead], summary="List my bookings")
@@ -140,6 +141,7 @@ def list_my_bookings(database: DatabaseSession, current_user: CurrentUser) -> li
 
     statement = (
         select(Booking)
+        .options(joinedload(Booking.facility))
         .where(Booking.user_id == current_user.id)
         .order_by(Booking.created_at.desc())
     )
@@ -176,5 +178,4 @@ def cancel_my_booking(
     booking.reviewed_by = None
     booking.reviewed_at = None
     database.commit()
-    database.refresh(booking)
-    return booking
+    return get_owned_booking(booking.id, current_user.id, database)

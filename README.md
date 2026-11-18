@@ -4,7 +4,7 @@
 
 **Project:** ALTA BUILDER 30 | Track A — Full-Stack Development
 **Duration:** 15 Days
-**Development Stage:** Heavy booking feature — backend conflict prevention
+**Development Stage:** Heavy booking feature working end to end
 **Project Type:** Full-Stack Web Application
 
 ---
@@ -183,7 +183,7 @@ npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173`. The React app includes registration, login, JWT session restoration, logout, protected routing, a shared CampusFlow layout, facility list/detail screens, and an administrator facility-management workspace backed by live FastAPI data.
+Open `http://127.0.0.1:5173`. The React app includes registration, login, JWT session restoration, protected routing, facility browsing, availability checking, student booking history and cancellation, administrator request review, facility management, and booking-decision notifications backed by live FastAPI data.
 
 To use the administrator workspace, first register an account and then promote it from the project root:
 
@@ -249,6 +249,7 @@ Example planned endpoints:
 | POST   | `/bookings/check-availability` | Check a proposed time slot  |
 | GET    | `/bookings`                   | Retrieve user bookings      |
 | PATCH  | `/bookings/{id}/cancel`       | Cancel an eligible booking  |
+| GET    | `/admin/bookings`              | Review booking requests     |
 | PATCH  | `/admin/bookings/{id}/approve` | Approve a request            |
 | PATCH  | `/admin/bookings/{id}/reject`  | Reject a request             |
 | GET    | `/admin/facilities`             | List managed facilities      |

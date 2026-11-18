@@ -23,11 +23,11 @@ export default function DashboardPage() {
           <span className="role-badge">{user.role}</span>
         </article>
         <article className="next-step-card card">
-          <p className="eyebrow">{user.role === "admin" ? "DIRECTORY CONTROLS" : "LIVE CAMPUS DIRECTORY"}</p>
-          <h2>{user.role === "admin" ? "Manage campus spaces" : "Find your next space"}</h2>
-          <p>{user.role === "admin" ? "Create, update, deactivate, or restore facilities from one protected workspace." : "Browse active campus facilities loaded directly from the FastAPI database."}</p>
-          <RouteLink className="inline-link" to={user.role === "admin" ? "/admin/facilities" : "/facilities"}>
-            {user.role === "admin" ? "Open facility manager →" : "Explore facilities →"}
+          <p className="eyebrow">{user.role === "admin" ? "BOOKING REVIEW" : "YOUR CAMPUS SCHEDULE"}</p>
+          <h2>{user.role === "admin" ? "Review student requests" : "Follow your bookings"}</h2>
+          <p>{user.role === "admin" ? "Approve or reject pending requests and trigger the student decision notification." : "See pending requests, decisions, upcoming reservations, and cancellations in one place."}</p>
+          <RouteLink className="inline-link" to={user.role === "admin" ? "/admin/bookings" : "/bookings"}>
+            {user.role === "admin" ? "Open review queue →" : "Open My bookings →"}
           </RouteLink>
         </article>
       </div>

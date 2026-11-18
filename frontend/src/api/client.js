@@ -54,8 +54,59 @@ export function getFacility(facilityId) {
   return apiRequest(`/facilities/${facilityId}`);
 }
 
-function adminHeaders(token) {
+function authHeaders(token) {
   return { Authorization: `Bearer ${token}` };
+}
+
+export function checkBookingAvailability(token, payload) {
+  return apiRequest("/bookings/check-availability", {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+export function createBooking(token, payload) {
+  return apiRequest("/bookings", {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getMyBookings(token) {
+  return apiRequest("/bookings", { headers: authHeaders(token) });
+}
+
+export function cancelBooking(token, bookingId) {
+  return apiRequest(`/bookings/${bookingId}/cancel`, {
+    method: "PATCH",
+    headers: authHeaders(token),
+  });
+}
+
+export function getAdminBookings(token, status = "pending") {
+  return apiRequest(`/admin/bookings?status=${encodeURIComponent(status)}`, {
+    headers: authHeaders(token),
+  });
+}
+
+export function approveBooking(token, bookingId) {
+  return apiRequest(`/admin/bookings/${bookingId}/approve`, {
+    method: "PATCH",
+    headers: authHeaders(token),
+  });
+}
+
+export function rejectBooking(token, bookingId) {
+  return apiRequest(`/admin/bookings/${bookingId}/reject`, {
+    method: "PATCH",
+    headers: authHeaders(token),
+  });
+}
+
+function adminHeaders(token) {
+  return authHeaders(token);
 }
 
 export function getAdminFacilities(token) {

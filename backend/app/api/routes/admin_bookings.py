@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
@@ -13,6 +13,7 @@ from app.database import get_db
 from app.models import Booking, BookingStatus, Facility, User
 from app.schemas.booking import AdminBookingRead
 from app.services.booking_conflicts import approved_conflict_id
+from app.services.notifications import send_booking_decision_email
 
 
 router = APIRouter(prefix="/admin/bookings")
@@ -74,6 +75,7 @@ def list_bookings_for_review(
 @router.patch("/{booking_id}/approve", response_model=AdminBookingRead, summary="Approve a booking")
 def approve_booking(
     booking_id: int,
+    background_tasks: BackgroundTasks,
     database: DatabaseSession,
     current_admin: CurrentAdmin,
 ) -> Booking:
@@ -116,12 +118,23 @@ def approve_booking(
             detail="Another booking was approved for this facility and time.",
         ) from None
 
-    return get_booking_for_review(booking.id, database)
+    reviewed_booking = get_booking_for_review(booking.id, database)
+    background_tasks.add_task(
+        send_booking_decision_email,
+        reviewed_booking.requester.email,
+        reviewed_booking.requester.full_name,
+        reviewed_booking.facility.name,
+        reviewed_booking.starts_at,
+        reviewed_booking.ends_at,
+        BookingStatus.APPROVED,
+    )
+    return reviewed_booking
 
 
 @router.patch("/{booking_id}/reject", response_model=AdminBookingRead, summary="Reject a booking")
 def reject_booking(
     booking_id: int,
+    background_tasks: BackgroundTasks,
     database: DatabaseSession,
     current_admin: CurrentAdmin,
 ) -> Booking:
@@ -133,4 +146,14 @@ def reject_booking(
     booking.reviewed_by = current_admin.id
     booking.reviewed_at = datetime.now(timezone.utc)
     database.commit()
-    return get_booking_for_review(booking.id, database)
+    reviewed_booking = get_booking_for_review(booking.id, database)
+    background_tasks.add_task(
+        send_booking_decision_email,
+        reviewed_booking.requester.email,
+        reviewed_booking.requester.full_name,
+        reviewed_booking.facility.name,
+        reviewed_booking.starts_at,
+        reviewed_booking.ends_at,
+        BookingStatus.REJECTED,
+    )
+    return reviewed_booking

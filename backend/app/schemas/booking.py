@@ -73,6 +73,7 @@ class BookingRead(BaseModel):
     purpose: str
     status: BookingStatus
     created_at: datetime
+    facility: FacilityRead
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -92,6 +93,5 @@ class AdminBookingRead(BookingRead):
 
     user_id: int
     requester: BookingRequesterRead
-    facility: FacilityRead
     reviewed_by: int | None
     reviewed_at: datetime | None
