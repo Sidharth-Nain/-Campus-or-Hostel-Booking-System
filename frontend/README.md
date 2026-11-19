@@ -1,6 +1,6 @@
-# CampusFlow React frontend
+# Campus Flow React frontend
 
-This is the active CampusFlow frontend. It includes React setup, hash-based routing, a shared layout, authentication, protected dashboards, live facility pages, administrator facility management, and the complete Day 13 booking workflow backed by FastAPI data.
+This is the active Campus Flow frontend. It includes a public homepage, a live facility catalog, protected student and teacher booking workflows, seat pass reservations, and administrator controls backed by FastAPI data.
 
 The original root-level HTML/CSS/JavaScript files remain as the UI prototype and design reference.
 
@@ -13,7 +13,7 @@ cd frontend
 npm install
 ```
 
-## Run CampusFlow locally
+## Run Campus Flow locally
 
 Use two VS Code terminals.
 
@@ -35,12 +35,15 @@ Open `http://127.0.0.1:5173` in the browser.
 
 ## Routes
 
+- `#/` previews nine live facilities with a Show more spaces control. Its booking preview and animated student conversation are illustrative and never make reservations.
 - `#/register` creates a student through `POST /api/v1/auth/register` and signs them in.
 - `#/login` signs in through `POST /api/v1/auth/login`.
 - `#/dashboard` is protected and loads the profile through `GET /api/v1/auth/me`.
 - `#/facilities` loads active spaces through `GET /api/v1/facilities`.
 - `#/facilities/:id` loads one space through `GET /api/v1/facilities/{id}`.
-- `#/bookings` shows a student's booking history and cancellation controls.
+- `#/teaching` lists whole classrooms and halls reserved for verified teachers.
+- `#/plans` compares four demo plans and lets students reserve and manage numbered seats.
+- `#/bookings` shows a student's or teacher's one-time requests and cancellation controls.
 - `#/admin/bookings` shows the administrator review queue with approval and rejection actions.
 - `#/admin/facilities` lets administrators create, edit, deactivate, and restore facilities through the protected admin API.
 

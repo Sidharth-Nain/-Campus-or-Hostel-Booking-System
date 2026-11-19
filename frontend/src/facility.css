@@ -1,0 +1,156 @@
+.catalog-page .directory-heading {
+  margin: 0;
+  padding: clamp(24px, 5vw, 58px);
+  align-items: center;
+  border: 1px solid #e7e0f9;
+  border-radius: 28px;
+  background: linear-gradient(115deg, #fff 15%, #f4efff 100%);
+}
+.catalog-page .directory-heading h1 {
+  max-width: 15ch;
+  margin: 10px 0 14px;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: .99;
+}
+.catalog-page .directory-heading .eyebrow { font-size: .875rem; }
+.catalog-page .directory-heading div > p:last-child { max-width: 57ch; margin: 0; color: var(--muted); line-height: 1.65; }
+.catalog-page .directory-heading .button { flex: none; }
+.teacher-access-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 16px 20px;
+  border: 1px solid #e7e0f9;
+  border-radius: 14px;
+  background: #faf8ff;
+}
+.teacher-access-note p { margin: 0; line-height: 1.6; }
+.teacher-access-note .button { flex: none; }
+.catalog-filters { display: flex; align-items: end; gap: 16px; }
+.catalog-filters .directory-search, .catalog-category {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.catalog-filters .directory-search { flex: 1; min-width: 0; }
+.catalog-category { min-width: 185px; }
+.catalog-filters label > span { color: var(--ink); font-size: .875rem; font-weight: 750; }
+.catalog-filters .directory-search input, .catalog-filters select {
+  min-height: 48px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  background: #fff;
+  font: inherit;
+}
+.catalog-filters select {
+  padding-right: 38px;
+  appearance: none;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%23544966' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") right 13px center no-repeat;
+}
+.catalog-filters :is(input, select):focus-visible { outline: 2px solid #613cc2; outline-offset: 2px; }
+.catalog-count { margin: -12px 0 -5px; color: var(--muted); font-size: .875rem; font-weight: 650; }
+.catalog-page .facility-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 19px; }
+.catalog-page .facility-card { display: flex; flex-direction: column; border-radius: 18px; background: #fff; }
+.catalog-page .facility-image { min-height: 0; height: 170px; }
+.facility-photo-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #faf8ff, #eee6fc);
+  color: var(--muted);
+  font-size: .875rem;
+}
+.facility-photo-credit {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  color: #fff;
+  background: rgb(33 27 56 / 92%);
+  font-size: .75rem;
+}
+.facility-photo-credit a { text-decoration: underline; }
+.facility-category {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  max-width: calc(100% - 28px);
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: #34206b;
+  background: #fff;
+  font-size: .875rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+.catalog-page .facility-content { flex: 1; padding: 19px; overflow-wrap: anywhere; }
+.catalog-page .facility-content h2 { margin: 5px 0 9px; font-size: 1.45rem; line-height: 1.15; }
+.catalog-page .facility-content .facility-location { margin: 0; color: #4b3191; font-size: .875rem; font-weight: 700; }
+.catalog-page .facility-content > p:not(.facility-location) { margin-bottom: 13px; font-size: 1rem; }
+.amenity-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 17px; padding: 0; list-style: none; }
+.amenity-list li { padding: 4px 9px; border-radius: 6px; color: #483584; background: #f2edfc; font-size: .875rem; line-height: 1.35; }
+.catalog-page .facility-meta { flex-wrap: wrap; gap: 5px 12px; border-color: var(--line); font-size: .875rem; }
+.catalog-page .facility-meta span:first-child { font-weight: 750; }
+.catalog-detail .detail-layout { grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); border-radius: 26px; }
+.catalog-detail .detail-image { min-height: 360px; }
+.catalog-detail .detail-image img { position: absolute; inset: 0; }
+.catalog-detail .detail-content { padding: clamp(25px, 5vw, 54px); overflow-wrap: anywhere; }
+.catalog-detail .detail-content .eyebrow { font-size: .875rem; }
+.catalog-detail .detail-content h1 { font-size: clamp(2.35rem, 5.2vw, 4.3rem); line-height: .99; }
+.catalog-detail .detail-facts { margin-top: 25px; }
+.catalog-detail .detail-facts div:last-child { grid-column: auto; }
+.catalog-detail .detail-facts dt { font-size: .875rem; }
+.catalog-detail .detail-book-button { max-width: 100%; margin-top: 20px; text-align: center; }
+.catalog-amenities { margin-top: 23px; }
+.catalog-amenities h2 { margin: 0 0 8px; font-family: var(--body); font-size: 1rem; font-weight: 750; }
+.catalog-amenities .amenity-list { margin-bottom: 0; }
+.facility-use-note { margin: 22px 0 0; padding: 12px 14px; border-radius: 10px; color: #3b2b70; background: #f7f3ff; line-height: 1.5; }
+.catalog-booking-panel {
+  scroll-margin-top: 125px;
+  gap: clamp(24px, 5vw, 54px);
+  border: 1px solid #e7e0f9;
+  border-radius: 26px;
+  color: var(--ink);
+  background: #faf8ff;
+  box-shadow: none;
+}
+.catalog-booking-panel:focus-visible { outline: 2px solid #613cc2; outline-offset: 4px; }
+.catalog-booking-panel .booking-panel-heading .eyebrow { color: #4b3191; font-size: .875rem; }
+.catalog-booking-panel .booking-panel-heading h2 { font-size: clamp(2rem, 4vw, 3.1rem); line-height: 1.05; }
+.catalog-booking-panel .booking-panel-heading > span { margin-top: 1rem; border-color: #dcd2f0; color: #4b3191; font-size: .875rem; }
+.catalog-booking-panel .booking-panel-copy { margin: 12px 0 0; color: var(--muted); line-height: 1.6; }
+.catalog-booking-panel .booking-form label { min-width: 0; color: var(--ink); font-size: .875rem; }
+.catalog-booking-panel .booking-form input, .catalog-booking-panel .booking-form textarea { min-width: 0; border-color: #dcd2f0; color: var(--ink); background: #fff; color-scheme: light; font-size: 1rem; }
+.catalog-booking-panel .booking-form textarea::placeholder { color: var(--muted); }
+.catalog-booking-panel .booking-form :is(input, textarea):focus-visible { outline: 2px solid #613cc2; outline-offset: 2px; box-shadow: none; }
+.catalog-booking-panel .outline { border-color: #dcd2f0; color: #432486; }
+.catalog-booking-panel .outline:hover:not(:disabled) { color: #fff; background: #432486; }
+.catalog-booking-panel .availability-result.available { color: #235749; background: #e7f4ee; }
+.catalog-booking-panel .availability-result.unavailable { color: #832b24; background: #fbece9; }
+.catalog-booking-panel .availability-result, .catalog-booking-panel .form-message { font-size: .875rem; }
+.catalog-booking-panel .availability-result span { color: #fff; }
+.catalog-booking-panel .booking-success { border-color: #dcd2f0; background: #fff; }
+.catalog-booking-panel .booking-success > span { color: #49318a; background: #eee8fb; }
+.catalog-booking-panel .booking-success p { color: var(--muted); font-size: .875rem; }
+.catalog-booking-panel .booking-success .inline-link { color: #49318a; font-size: .875rem; }
+
+@media (max-width: 850px) {
+  .catalog-detail .detail-layout { grid-template-columns: 1fr; }
+  .catalog-detail .detail-image { min-height: clamp(205px, 50vw, 360px); }
+}
+@media (max-width: 650px) {
+  .catalog-page .directory-heading, .teacher-access-note { align-items: start; flex-direction: column; gap: 15px; }
+  .catalog-filters { flex-direction: column; align-items: stretch; }
+  .catalog-filters .directory-search { flex: auto; }
+  .catalog-detail .detail-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

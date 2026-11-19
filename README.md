@@ -1,17 +1,26 @@
-# CampusFlow
+# Campus Flow
 
 ### Smart Campus Facility Booking & Management System
 
+The live Campus Flow app is the React frontend; the root HTML prototype is an earlier design reference.
+
+## What you can try now
+
+- Browse the 20-space starter catalog and check capacity, amenities, and booking type.
+- Use a verified teacher account to request a full classroom or teaching hall. Libraries and study areas are not teaching venues.
+- Use a student account to compare four seat passes, find a numbered seat, and reserve it for the whole 7-, 14-, or 30-day term. Pass prices are illustrative; there is no payment or auto-renewal.
+- Open the homepage for student and teacher booking examples and six FAQs.
+
 **Project:** ALTA BUILDER 30 | Track A — Full-Stack Development
 **Duration:** 15 Days
-**Development Stage:** Heavy booking feature working end to end
+**Development Stage:** Expanded catalog, teacher room requests, and demo seat passes
 **Project Type:** Full-Stack Web Application
 
 ---
 
 ## 01. Project Overview
 
-CampusFlow is a web-based facility reservation and management platform designed to simplify how educational institutions manage shared campus resources.
+Campus Flow is a web-based facility reservation and management platform designed to simplify how educational institutions manage shared campus resources.
 
 The platform will provide a centralized system where students and faculty can explore available facilities, check booking availability, submit reservation requests, and monitor their booking status.
 
@@ -33,11 +42,11 @@ Managing reservations for these resources can become challenging when bookings r
 - **Lack of transparency:** Users may have difficulty tracking their reservation status.
 - **Inefficient record management:** Administrators may struggle to maintain accurate booking histories.
 
-CampusFlow aims to address these challenges through a unified booking and management system.
+Campus Flow aims to address these challenges through a unified booking and management system.
 
 ## 03. Our Approach
 
-CampusFlow will follow a request-and-approval booking model.
+Campus Flow uses request-and-approval for one-time bookings. Student seat passes reserve an available seat immediately for a fixed term.
 
 Users will be able to browse campus facilities, select a preferred date and time, and submit a reservation request.
 
@@ -49,7 +58,7 @@ The application will prioritize three principles:
 2. **Reliability:** Consistent booking validation and conflict prevention.
 3. **Transparency:** Clear reservation statuses and accessible booking history.
 
-## 04. Who Will Use CampusFlow?
+## 04. Who Will Use Campus Flow?
 
 ### Student
 
@@ -72,7 +81,7 @@ Faculty members will be able to:
 - Review upcoming and previous bookings.
 - Cancel eligible reservations.
 
-For the initial version, faculty and students will share the same booking permissions.
+Verified teachers request whole teaching rooms and use their own booking history. They cannot use student seat passes or reserve a library for teaching.
 
 ### Administrator
 
@@ -166,7 +175,7 @@ The final technology choices may be adjusted based on deployment compatibility, 
 
 ## Running the current application
 
-CampusFlow now has a React frontend in `frontend/` and a FastAPI backend in `backend/`. Start them in two VS Code terminals.
+Campus Flow has a React frontend in `frontend/` and a FastAPI backend in `backend/`. Start them in two VS Code terminals.
 
 **Terminal 1 — backend:**
 
@@ -191,11 +200,19 @@ To use the administrator workspace, first register an account and then promote i
 .venv/bin/python backend/scripts/promote_admin.py your@email.com
 ```
 
-Sign in again and open **Manage** in the navigation. Administrators can create, edit, deactivate, and restore facilities. Deactivation keeps existing booking records safe while hiding the facility from student pages.
+Sign in again and open **Manage spaces** in the navigation. Administrators can create, edit, deactivate, and restore facilities. Deactivation keeps existing booking records safe while hiding the facility from student pages.
+
+To enable teacher booking, register a separate account and run this from the same project folder as the backend:
+
+```bash
+.venv/bin/python backend/scripts/promote_teacher.py YOUR_REGISTERED_EMAIL
+```
+
+Sign out and back in, then open **Teaching rooms**. Restarting the backend adds missing starter spaces without resetting existing accounts or bookings.
 
 ## 07. System Architecture
 
-CampusFlow will use a client-server architecture with a separate frontend, backend API, and database.
+Campus Flow uses a client-server architecture with a separate frontend, backend API, and database.
 
 **Architecture Flow**
 
@@ -410,7 +427,7 @@ The roadmap is a proposed implementation schedule and will be aligned with the o
 
 ## 12. Quality Assurance & Testing
 
-CampusFlow will be tested across functionality, validation, security, and usability.
+Campus Flow will be tested across functionality, validation, security, and usability.
 
 ### Functional Testing
 
@@ -470,7 +487,7 @@ The live application will be tested after deployment to verify communication bet
 
 ## 14. Development Principles
 
-CampusFlow will be developed with the following priorities:
+Campus Flow will be developed with the following priorities:
 
 1. Build a functional minimum viable product before introducing optional features.
 2. Keep frontend, backend, and database responsibilities clearly separated.
@@ -482,7 +499,7 @@ CampusFlow will be developed with the following priorities:
 
 ## 15. Success Criteria
 
-CampusFlow will be considered ready for its initial release when:
+Campus Flow will be considered ready for its initial release when:
 
 - Students and faculty can authenticate successfully.
 - Facilities can be browsed and selected.
@@ -496,7 +513,7 @@ CampusFlow will be considered ready for its initial release when:
 
 ## 16. Project Vision
 
-CampusFlow is intended to demonstrate how a practical institutional problem can be addressed through full-stack software development.
+Campus Flow demonstrates how campus booking can be addressed through full-stack software development.
 
 Beyond the challenge, the project has the potential to evolve into a campus-wide resource management platform with improved scheduling, automation, and facility utilization insights.
 
@@ -504,7 +521,7 @@ The final objective is to deliver a functional, understandable, and maintainable
 
 ---
 
-**CampusFlow — Making Campus Spaces Easier to Access.**
+**Campus Flow — Find your seat. Make room to teach.**
 
 *Developed as part of ALTA BUILDER 30 | Track A — Full-Stack Development.*
 

@@ -1,4 +1,4 @@
-"""Application entry point for the CampusFlow API."""
+"""Application entry point for the Campus Flow API."""
 
 from contextlib import asynccontextmanager
 
@@ -10,7 +10,7 @@ from app.core.config import get_settings
 from app.database import Base, SessionLocal, engine
 from app.models import Facility  # Import models before metadata is created.
 from app.services.database_guards import ensure_postgres_booking_guards
-from app.services.seed import seed_facilities
+from app.services.seed import seed_facilities, upgrade_facility_catalog
 
 
 settings = get_settings()
@@ -21,6 +21,7 @@ async def lifespan(_: FastAPI):
     """Create local tables and starter facilities when the API starts."""
 
     Base.metadata.create_all(bind=engine)
+    upgrade_facility_catalog(engine)
     ensure_postgres_booking_guards(engine)
     with SessionLocal() as database:
         seed_facilities(database)
@@ -50,7 +51,7 @@ def root() -> dict[str, str]:
     """Provide a small landing response for a running local API."""
 
     return {
-        "message": "CampusFlow API is running.",
+        "message": f"{settings.app_name} is running.",
         "documentation": "/docs",
         "health_check": f"{settings.api_v1_prefix}/health",
     }

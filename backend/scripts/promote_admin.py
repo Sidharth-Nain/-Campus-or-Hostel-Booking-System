@@ -1,4 +1,4 @@
-"""Promote an existing CampusFlow account to administrator from the terminal."""
+"""Promote an existing Campus Flow account to administrator from the terminal."""
 
 import argparse
 import sys
@@ -16,7 +16,7 @@ from app.models import User, UserRole  # noqa: E402
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Promote an existing registered CampusFlow user to administrator."
+        description="Promote an existing registered Campus Flow user to administrator."
     )
     parser.add_argument("email", help="Email address of the registered account")
     arguments = parser.parse_args()

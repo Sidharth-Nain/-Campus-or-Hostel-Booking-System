@@ -1,4 +1,4 @@
-"""Request and response schemas for student facility bookings."""
+"""Request and response schemas for one-time space bookings."""
 
 from datetime import datetime, timedelta, timezone
 from typing import Self
@@ -21,6 +21,8 @@ class BookingInterval(BaseModel):
 
         if self.starts_at.utcoffset() is None or self.ends_at.utcoffset() is None:
             raise ValueError("Booking times must include a timezone.")
+        self.starts_at = self.starts_at.astimezone(timezone.utc)
+        self.ends_at = self.ends_at.astimezone(timezone.utc)
         if self.starts_at <= datetime.now(timezone.utc):
             raise ValueError("Booking start time must be in the future.")
         if self.ends_at <= self.starts_at:
@@ -76,6 +78,13 @@ class BookingRead(BaseModel):
     facility: FacilityRead
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("starts_at", "ends_at", "created_at")
+    @classmethod
+    def restore_sqlite_timezone(cls, value: datetime) -> datetime:
+        """SQLite returns stored UTC timestamps without their timezone marker."""
+
+        return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value
 
 
 class BookingRequesterRead(BaseModel):

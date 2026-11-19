@@ -3,9 +3,9 @@ import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import AuthShell from "../components/AuthShell";
 import { RouteLink } from "../components/AppLayout";
-import { navigate } from "../router";
+import { authRoute } from "../router";
 
-export default function RegisterPage() {
+export default function RegisterPage({ returnRoute }) {
   const { signUp } = useAuth();
   const [form, setForm] = useState({ full_name: "", email: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
@@ -30,7 +30,6 @@ export default function RegisterPage() {
     setSubmitting(true);
     try {
       await signUp({ full_name: form.full_name, email: form.email, password: form.password });
-      navigate("/dashboard");
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -51,7 +50,7 @@ export default function RegisterPage() {
         {error && <p className="form-message error" role="alert">{error}</p>}
         <button className="button primary" type="submit" disabled={submitting}>{submitting ? "Creating account…" : "Create account"}</button>
       </form>
-      <p className="auth-switch">Already registered? <RouteLink to="/login">Sign in</RouteLink></p>
+      <p className="auth-switch">Already registered? <RouteLink to={authRoute("/login", returnRoute)}>Sign in</RouteLink></p>
     </AuthShell>
   );
 }

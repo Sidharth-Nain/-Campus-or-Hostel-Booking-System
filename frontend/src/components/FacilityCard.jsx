@@ -1,18 +1,28 @@
 import { RouteLink } from "./AppLayout";
-import { facilityImage } from "../facilityImages";
+import FacilityPhoto from "./FacilityPhoto";
+import { bookingModes, facilityBookingMode } from "../facilityBooking";
 
-export default function FacilityCard({ facility, featured = false }) {
+export default function FacilityCard({ facility }) {
+  const amenities = facility.amenities || [];
+  const mode = facilityBookingMode(facility);
+
   return (
-    <article className={`facility-card card ${featured ? "featured" : ""}`}>
+    <article className="facility-card card">
       <div className="facility-image">
-        <img src={facilityImage(facility.name)} alt={facility.name} loading="lazy" />
-        <span className="active-badge">Available</span>
+        <FacilityPhoto facility={facility} lazy />
+        <span className="facility-category">{facility.category || "Campus space"}</span>
       </div>
       <div className="facility-content">
-        <p className="eyebrow">{facility.location}</p>
+        <p className="facility-location">{facility.location}</p>
         <h2>{facility.name}</h2>
         <p>{facility.description}</p>
-        <div className="facility-meta"><span>{facility.capacity} people</span><span>Active facility</span></div>
+        {amenities.length > 0 && (
+          <ul className="amenity-list" aria-label="Featured amenities">
+            {amenities.slice(0, 3).map((amenity) => <li key={amenity}>{amenity}</li>)}
+            {amenities.length > 3 && <li>+{amenities.length - 3} more</li>}
+          </ul>
+        )}
+        <div className="facility-meta"><span>{facility.capacity} {mode === "study_seat" ? "seats" : "people"}</span><span>{bookingModes[mode]}</span></div>
         <RouteLink className="button outline" to={`/facilities/${facility.id}`}>View details</RouteLink>
       </div>
     </article>

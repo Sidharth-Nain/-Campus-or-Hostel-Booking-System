@@ -31,11 +31,11 @@ Then open these addresses in a browser:
 - `POST /api/v1/auth/login` verifies the email and password, then returns a JWT access token.
 - `GET /api/v1/auth/me` returns the logged-in user's safe profile. In the API docs, click **Authorize** and paste the access token returned by login.
 
-## Student booking endpoints
+## Student and teacher booking endpoints
 
 - `POST /api/v1/bookings/check-availability` checks a validated future interval without exposing another student's booking details.
-- `POST /api/v1/bookings` creates a pending facility request for the logged-in student.
-- `GET /api/v1/bookings` returns only that student's booking history.
+- `POST /api/v1/bookings` creates a pending facility request for the logged-in student or teacher.
+- `GET /api/v1/bookings` returns only the signed-in account's booking history.
 - `GET /api/v1/bookings/{booking_id}` returns one owned booking without exposing other students' data.
 - `PATCH /api/v1/bookings/{booking_id}/cancel` cancels an eligible pending or approved booking.
 
@@ -43,13 +43,24 @@ Booking requests must be in the future, include a timezone, end after they start
 
 Overlap checks are shared by availability, request creation, and administrator approval so all three paths use the same rule. On PostgreSQL, application startup installs an exclusion constraint as the final concurrency guard. If two administrators approve overlapping requests at almost the same time, the database accepts only one and the API returns a clear `409` response for the other.
 
+Teachers can only request whole teaching rooms. Students cannot request those rooms or reserve a dedicated numbered-seat space as a whole room. To enable teacher access for an existing student account, run `.venv/bin/python backend/scripts/promote_teacher.py teacher@example.com` from the project root, replacing the example address. Public signup does not grant the teacher role.
+
+## Student seat passes
+
+- `GET /api/v1/seat-passes/plans` lists four fixed-duration demo plans and INR prices.
+- `GET /api/v1/seat-passes/availability` checks eligible numbered seats using `plan_id`, `facility_id`, and `starts_on`.
+- `POST /api/v1/seat-passes` reserves a seat for the term; `GET /api/v1/seat-passes` lists the student's passes.
+- `PATCH /api/v1/seat-passes/{id}/cancel` releases the seat from a non-expired pass.
+
+Dates use Asia/Kolkata. The API returns an exclusive end date. A student can hold only one pass for overlapping dates. The plans do not charge, auto-renew, or send payment information anywhere.
+
 ## Administrator booking endpoints
 
 - `GET /api/v1/admin/bookings` returns pending requests by default. Use `?status=approved`, `?status=rejected`, or `?status=all` to review other records.
 - `PATCH /api/v1/admin/bookings/{booking_id}/approve` approves an available pending request.
 - `PATCH /api/v1/admin/bookings/{booking_id}/reject` rejects a pending request.
 
-Every approval or rejection queues a decision email after the database commit. During local development, CampusFlow prints a safe email preview in the FastAPI terminal. To send real email, add the SMTP settings from `.env.example` to `backend/.env`. Email failure is logged without undoing the administrator's saved decision.
+Every approval or rejection queues a decision email after the database commit. During local development, Campus Flow prints an email preview in the FastAPI terminal. To send real email, add the SMTP settings from `.env.example` to `backend/.env`. Email failure is logged without undoing the administrator's saved decision.
 
 Public registration always creates a student account. To make an existing local account an administrator, run this from the project root in a second VS Code terminal:
 
@@ -67,5 +78,7 @@ Replace the example email with an account that was already registered through th
 - `DELETE /api/v1/admin/facilities/{facility_id}` safely deactivates a facility.
 
 Deactivation is intentionally used instead of permanent deletion. It removes the facility from student-facing endpoints while preserving any booking history linked to it. Duplicate name-and-location combinations return `409`, and student accounts receive `403` on every management endpoint.
+
+The API adds missing entries from the 20-facility starter catalog on startup. Existing data is kept in the same database. Facilities expose capacity, category, amenities, and booking mode; the mode is fixed after creation to keep bookings and seat passes separate.
 
 The application uses a local SQLite file by default, so it works before PostgreSQL is installed. To use PostgreSQL, copy `backend/.env.example` to `backend/.env` and replace its placeholder connection string. Do not commit `.env` because it can contain passwords.

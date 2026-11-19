@@ -3,7 +3,7 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, Enum as SqlEnum, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import Boolean, CheckConstraint, DateTime, Enum as SqlEnum, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -12,6 +12,7 @@ from app.database import Base
 class UserRole(str, Enum):
     STUDENT = "student"
     ADMIN = "admin"
+    TEACHER = "teacher"
 
 
 class BookingStatus(str, Enum):
@@ -41,6 +42,12 @@ class Facility(Base):
     __table_args__ = (
         UniqueConstraint("name", "location", name="facilities_name_location_unique"),
         CheckConstraint("capacity > 0", name="facilities_capacity_positive"),
+        CheckConstraint("booking_mode IN ('standard', 'teaching', 'study_room', 'study_seat')", name="facilities_booking_mode_valid"),
+        CheckConstraint(
+            "(booking_mode = 'study_seat' AND seat_tier IS NOT NULL AND seat_tier BETWEEN 1 AND 4)"
+            " OR (booking_mode <> 'study_seat' AND seat_tier IS NULL)",
+            name="facilities_seat_tier_valid",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -48,6 +55,10 @@ class Facility(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
     location: Mapped[str] = mapped_column(String(160), nullable=False)
+    category: Mapped[str] = mapped_column(String(40), default="General", server_default="General", nullable=False)
+    amenities: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]", nullable=False)
+    booking_mode: Mapped[str] = mapped_column(String(20), default="standard", server_default="standard", nullable=False)
+    seat_tier: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

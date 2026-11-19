@@ -25,14 +25,14 @@ def send_booking_decision_email(
 
     settings = get_settings()
     decision_text = "approved" if decision == BookingStatus.APPROVED else "rejected"
-    subject = f"CampusFlow booking {decision_text}: {facility_name}"
+    subject = f"Campus Flow booking {decision_text}: {facility_name}"
     body = (
         f"Hello {recipient_name},\n\n"
         f"Your booking request for {facility_name} has been {decision_text}.\n"
         f"Start: {starts_at.isoformat()}\n"
         f"End: {ends_at.isoformat()}\n\n"
-        "You can review the latest status in My bookings on CampusFlow.\n\n"
-        "CampusFlow"
+        "You can review the latest status in My bookings on Campus Flow.\n\n"
+        "Campus Flow"
     )
 
     if not settings.smtp_host:

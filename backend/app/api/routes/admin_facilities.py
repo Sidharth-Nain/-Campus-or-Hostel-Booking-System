@@ -104,6 +104,18 @@ def update_facility(
 
     facility = get_managed_facility(facility_id, database)
     changes = payload.model_dump(exclude_unset=True)
+    if changes.get("booking_mode", facility.booking_mode) != facility.booking_mode:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A facility's booking type cannot change once created.",
+        )
+    if changes.get("seat_tier", facility.seat_tier) != facility.seat_tier or (
+        facility.booking_mode == "study_seat" and changes.get("capacity", facility.capacity) != facility.capacity
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The seat count and plan tier cannot be changed after creation.",
+        )
     proposed_name = changes.get("name", facility.name)
     proposed_location = changes.get("location", facility.location)
     ensure_unique_location(database, proposed_name, proposed_location, facility.id)

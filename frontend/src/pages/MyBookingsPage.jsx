@@ -17,9 +17,11 @@ export default function MyBookingsPage() {
   const [actionId, setActionId] = useState(null);
   const [confirmingId, setConfirmingId] = useState(null);
   const [notice, setNotice] = useState("");
+  const canBook = user.role === "student" || user.role === "teacher";
+  const directory = user.role === "teacher" ? "/teaching" : "/facilities";
 
   const loadBookings = useCallback(async () => {
-    if (user.role !== "student") {
+    if (!canBook) {
       setLoading(false);
       return;
     }
@@ -32,7 +34,7 @@ export default function MyBookingsPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, user.role]);
+  }, [token, canBook]);
 
   useEffect(() => {
     loadBookings();
@@ -43,8 +45,8 @@ export default function MyBookingsPage() {
     [bookings, filter],
   );
 
-  if (user.role !== "student") {
-    return <section className="admin-access card"><span>CF</span><p className="eyebrow">STUDENT WORKSPACE</p><h1>Student bookings live here.</h1><p>Use the administrator request queue to review campus bookings.</p><RouteLink className="button primary" to="/admin/bookings">Open review queue</RouteLink></section>;
+  if (!canBook) {
+    return <section className="admin-access card"><span>DH</span><p className="eyebrow">PERSONAL BOOKINGS</p><h1>Manage requests from the review queue.</h1><p>This page shows personal bookings for students and teachers.</p><RouteLink className="button primary" to="/admin/bookings">Open review queue</RouteLink></section>;
   }
   if (loading) return <LoadingState message="Loading your booking history…" />;
   if (error) return <ErrorState message={error} onRetry={loadBookings} />;
@@ -68,7 +70,7 @@ export default function MyBookingsPage() {
     <section className="bookings-page">
       <header className="bookings-heading">
         <div><p className="eyebrow">YOUR CAMPUS SCHEDULE</p><h1>My <em>bookings.</em></h1><p>Follow every request from submission to the administrator’s decision.</p></div>
-        <RouteLink className="button primary" to="/facilities">Find another space</RouteLink>
+        <RouteLink className="button primary" to={directory}>Find another space</RouteLink>
       </header>
 
       {notice && <p className="admin-notice" role="status">{notice}</p>}
@@ -78,7 +80,7 @@ export default function MyBookingsPage() {
       </div>
 
       {visibleBookings.length === 0 ? (
-        <div className="empty-state bookings-empty"><strong>No {filter === "all" ? "" : `${filter} `}bookings yet.</strong><p>Explore the facility directory when you are ready to reserve a space.</p><RouteLink className="inline-link" to="/facilities">Browse facilities →</RouteLink></div>
+        <div className="empty-state bookings-empty"><strong>No {filter === "all" ? "" : `${filter} `}bookings yet.</strong><p>Explore the directory when you are ready to reserve a space.</p><RouteLink className="inline-link" to={directory}>{user.role === "teacher" ? "Browse teaching spaces" : "Browse facilities"}</RouteLink></div>
       ) : (
         <div className="booking-list">
           {visibleBookings.map((booking) => (

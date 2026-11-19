@@ -1,1 +1,1 @@
-"""API routers for CampusFlow."""
+"""API routers for Campus Flow."""

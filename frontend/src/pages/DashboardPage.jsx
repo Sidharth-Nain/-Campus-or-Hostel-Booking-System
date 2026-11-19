@@ -1,20 +1,23 @@
-import { API_BASE_URL } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { RouteLink } from "../components/AppLayout";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const firstName = user.full_name.split(" ")[0];
+  const action = {
+    student: ["Make a study routine", "Reserve the same numbered seat for a fixed term.", "/plans", "Explore seat passes"],
+    teacher: ["Plan your next class", "Request a whole classroom or hall with the equipment you need.", "/teaching", "Find teaching rooms"],
+    admin: ["Review booking requests", "See which students and teachers are waiting for a decision.", "/admin/bookings", "Open review queue"],
+  }[user.role];
 
   return (
     <section className="dashboard-page">
       <div className="dashboard-hero">
         <div>
-          <p className="eyebrow">AUTHENTICATED {user.role === "admin" ? "ADMINISTRATOR" : "STUDENT"} AREA</p>
+          <p className="eyebrow">{user.role} workspace</p>
           <h1>Good to see you, <em>{firstName}.</em></h1>
-          <p>Your React frontend is connected to the CampusFlow API and your session is protected with a JWT.</p>
+          <p>{user.role === "admin" ? "Manage campus spaces and decide who gets to use them." : "Find the space you need and keep track of your requests."}</p>
         </div>
-        <span className="connection-badge"><i />API connected</span>
       </div>
       <div className="dashboard-grid">
         <article className="profile-card card">
@@ -23,15 +26,11 @@ export default function DashboardPage() {
           <span className="role-badge">{user.role}</span>
         </article>
         <article className="next-step-card card">
-          <p className="eyebrow">{user.role === "admin" ? "BOOKING REVIEW" : "YOUR CAMPUS SCHEDULE"}</p>
-          <h2>{user.role === "admin" ? "Review student requests" : "Follow your bookings"}</h2>
-          <p>{user.role === "admin" ? "Approve or reject pending requests and trigger the student decision notification." : "See pending requests, decisions, upcoming reservations, and cancellations in one place."}</p>
-          <RouteLink className="inline-link" to={user.role === "admin" ? "/admin/bookings" : "/bookings"}>
-            {user.role === "admin" ? "Open review queue →" : "Open My bookings →"}
-          </RouteLink>
+          <h2>{action[0]}</h2>
+          <p>{action[1]}</p>
+          <RouteLink className="inline-link" to={action[2]}>{action[3]}</RouteLink>
         </article>
       </div>
-      <p className="api-note">Connected locally to <code>{API_BASE_URL}</code></p>
     </section>
   );
 }

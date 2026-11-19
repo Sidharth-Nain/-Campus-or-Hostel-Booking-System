@@ -1,0 +1,111 @@
+.site-shell,
+.auth-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.auth-card { overflow: hidden; }
+
+.campus-motion {
+  --trail: #9562ec;
+  --signal: #7343db;
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.campus-motion svg {
+  position: absolute;
+  top: var(--motion-top, 44%);
+  left: var(--motion-left, 59%);
+  width: var(--motion-width, clamp(750px, 100%, 1400px));
+  height: auto;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+}
+
+.campus-motion__sweep {
+  transform-origin: center;
+  animation: campus-flow-sway 10s ease-in-out -3s infinite alternate;
+}
+
+.campus-motion__tracks {
+  stroke: var(--trail);
+  stroke-width: 2;
+  opacity: .42;
+}
+
+.campus-motion__signals {
+  stroke: var(--signal);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  opacity: .7;
+}
+
+.campus-motion__signals path {
+  stroke-dasharray: 7 3 .35 3 .35 86.3;
+  animation: campus-flow-glide 8s linear -2s infinite;
+}
+
+.campus-motion__signals path:nth-child(2) { animation-delay: -5s; }
+.campus-motion__signals path:nth-child(3) { animation-delay: -.8s; }
+.campus-motion__signals path:nth-child(4) { animation-delay: -6.8s; }
+
+.campus-motion--landing {
+  background: radial-gradient(ellipse at 82% 40%, #ebdfff 0%, transparent 66%);
+}
+
+.campus-motion--landing svg {
+  mask-image: linear-gradient(102deg, transparent 12%, black 42%, black 98%);
+}
+
+.campus-motion--site {
+  --motion-top: 49%;
+  --motion-left: 60%;
+  --motion-width: clamp(1180px, 126vw, 2120px);
+  position: fixed;
+  opacity: .54;
+  mask-image: radial-gradient(ellipse 55% 80% at 50% 50%, transparent 56%, black);
+}
+
+.campus-motion--auth {
+  --motion-top: 17%;
+  --motion-left: 13%;
+  --motion-width: clamp(690px, 148%, 990px);
+  background: radial-gradient(ellipse at 95% 0%, #efe5ff 0%, transparent 62%);
+}
+
+.campus-motion--auth svg {
+  opacity: .65;
+  mask-image: linear-gradient(165deg, black 24%, transparent 69%);
+}
+
+@keyframes campus-flow-sway {
+  from { transform: translate(-30px, -21px) rotate(-5deg); }
+  to { transform: translate(26px, 28px) rotate(6deg); }
+}
+
+@keyframes campus-flow-glide {
+  to { stroke-dashoffset: -100; }
+}
+
+@media (max-width: 740px) {
+  .campus-motion--landing {
+    --motion-top: 56%;
+    --motion-left: 56%;
+    --motion-width: clamp(580px, 118%, 790px);
+    background: radial-gradient(ellipse at 88% 75%, #ebdfff 0%, transparent 65%);
+  }
+
+  .campus-motion--landing svg {
+    mask-image: linear-gradient(157deg, transparent 21%, black 55%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campus-motion__sweep,
+  .campus-motion__signals path { animation: none; }
+  .campus-motion__signals { display: none; }
+}

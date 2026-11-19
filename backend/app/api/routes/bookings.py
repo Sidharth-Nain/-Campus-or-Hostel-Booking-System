@@ -1,4 +1,4 @@
-"""Authenticated student booking routes for the Day 6 milestone."""
+"""One-time facility bookings for students and verified teachers."""
 
 from typing import Annotated
 
@@ -50,6 +50,31 @@ def get_active_facility(facility_id: int, database: Session) -> Facility:
     return facility
 
 
+def get_requestable_facility(facility_id: int, database: Session, requester: User) -> Facility:
+    """Apply the same role and room rules for preview and submission."""
+
+    if requester.role not in {UserRole.STUDENT, UserRole.TEACHER}:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account cannot request bookings.")
+
+    facility = get_active_facility(facility_id, database)
+    if requester.role == UserRole.TEACHER and facility.booking_mode != "teaching":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Teachers can reserve whole classrooms and teaching halls only. Libraries are for study.",
+        )
+    if requester.role == UserRole.STUDENT and facility.booking_mode == "teaching":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only verified teacher accounts can request this classroom or teaching hall.",
+        )
+    if facility.booking_mode == "study_seat":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Use a study pass to book a numbered seat in this facility.",
+        )
+    return facility
+
+
 @router.post(
     "/check-availability",
     response_model=BookingAvailabilityRead,
@@ -58,11 +83,11 @@ def get_active_facility(facility_id: int, database: Session) -> Facility:
 def check_booking_availability(
     payload: BookingAvailabilityRequest,
     database: DatabaseSession,
-    _: CurrentUser,
+    current_user: CurrentUser,
 ) -> BookingAvailabilityRead:
     """Tell the UI whether an interval overlaps an approved reservation."""
 
-    get_active_facility(payload.facility_id, database)
+    get_requestable_facility(payload.facility_id, database, current_user)
     conflict = approved_conflict_id(
         database,
         payload.facility_id,
@@ -91,13 +116,7 @@ def create_booking(
 ) -> Booking:
     """Create a pending request after basic facility and overlap validation."""
 
-    if current_user.role != UserRole.STUDENT:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only student accounts can request bookings.",
-        )
-
-    get_active_facility(payload.facility_id, database)
+    get_requestable_facility(payload.facility_id, database, current_user)
 
     if approved_conflict_id(
         database,

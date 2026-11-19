@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 
-const DEFAULT_ROUTE = "/login";
+const DEFAULT_ROUTE = "/";
+
+export function authRoute(path, next) {
+  return next ? `${path}?next=${encodeURIComponent(next)}` : path;
+}
+
+export function safeReturnRoute(query) {
+  const next = new URLSearchParams(query).get("next");
+  return next === "/teaching" || /^\/(?:facilities|plans)(?:\/\d+)?$/.test(next || "") ? next : null;
+}
 
 export function currentRoute() {
   const route = window.location.hash.replace(/^#/, "");

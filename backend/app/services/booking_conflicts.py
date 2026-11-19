@@ -1,4 +1,4 @@
-"""Shared overlap checks for CampusFlow's booking engine."""
+"""Shared overlap checks for the Campus Flow booking engine."""
 
 from datetime import datetime
 

@@ -1,3 +1,5 @@
+import { BRAND_NAME } from "../brand";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
 
 function readableError(detail) {
@@ -16,7 +18,7 @@ async function apiRequest(path, options = {}) {
   try {
     response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
   } catch {
-    throw new Error("CampusFlow API is not reachable. Make sure the FastAPI terminal is running.");
+    throw new Error(`${BRAND_NAME} could not reach the booking server. Try again in a moment.`);
   }
 
   const data = await response.json().catch(() => null);
@@ -56,6 +58,29 @@ export function getFacility(facilityId) {
 
 function authHeaders(token) {
   return { Authorization: `Bearer ${token}` };
+}
+
+export function getSeatPlans() {
+  return apiRequest("/seat-passes/plans");
+}
+
+export function getSeatAvailability(token, selection) {
+  const query = new URLSearchParams(selection);
+  return apiRequest(`/seat-passes/availability?${query}`, { headers: authHeaders(token) });
+}
+
+export function reserveSeatPass(token, payload) {
+  return apiRequest("/seat-passes", {
+    method: "POST", headers: authHeaders(token), body: JSON.stringify(payload),
+  });
+}
+
+export function getMySeatPasses(token) {
+  return apiRequest("/seat-passes", { headers: authHeaders(token) });
+}
+
+export function cancelSeatPass(token, id) {
+  return apiRequest(`/seat-passes/${id}/cancel`, { method: "PATCH", headers: authHeaders(token) });
 }
 
 export function checkBookingAvailability(token, payload) {

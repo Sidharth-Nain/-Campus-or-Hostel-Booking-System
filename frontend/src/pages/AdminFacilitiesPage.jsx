@@ -7,14 +7,22 @@ import {
   updateFacility,
 } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import { BRAND_NAME } from "../brand";
 import { ErrorState, LoadingState } from "../components/PageState";
+import { bookingModes, facilityBookingMode } from "../facilityBooking";
 
 const EMPTY_FORM = {
   name: "",
   description: "",
   capacity: "",
   location: "",
+  category: "General",
+  amenities: "",
+  booking_mode: "standard",
+  seat_tier: "1",
 };
+
+const SEAT_TIER_NAMES = ["Focus Week", "Study Sprint", "Campus Desk", "Studio Desk"];
 
 function AdminAccessRequired() {
   return (
@@ -22,7 +30,7 @@ function AdminAccessRequired() {
       <span>403</span>
       <p className="eyebrow">RESTRICTED WORKSPACE</p>
       <h1>Administrator access required.</h1>
-      <p>Your account can browse facilities, but only a CampusFlow administrator can change the directory.</p>
+      <p>Your account can browse facilities, but only a {BRAND_NAME} administrator can change the directory.</p>
     </section>
   );
 }
@@ -39,6 +47,7 @@ export default function AdminFacilitiesPage() {
   const [notice, setNotice] = useState("");
   const [confirmingId, setConfirmingId] = useState(null);
   const [actionId, setActionId] = useState(null);
+  const seatSpace = form.booking_mode === "study_seat";
 
   const loadFacilities = useCallback(async () => {
     if (user.role !== "admin") {
@@ -82,6 +91,10 @@ export default function AdminFacilitiesPage() {
       description: facility.description,
       capacity: String(facility.capacity),
       location: facility.location,
+      category: facility.category || "General",
+      amenities: (facility.amenities || []).join("\n"),
+      booking_mode: facilityBookingMode(facility),
+      seat_tier: String(facility.seat_tier || 1),
     });
     setFormError("");
     setNotice("");
@@ -95,10 +108,26 @@ export default function AdminFacilitiesPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setSaving(true);
     setFormError("");
     setNotice("");
-    const payload = { ...form, capacity: Number(form.capacity) };
+    const amenities = [...new Set(form.amenities.split("\n").map((amenity) => amenity.trim()).filter(Boolean))];
+    if (amenities.length > 12 || amenities.some((amenity) => amenity.length > 60)) {
+      setFormError("List up to 12 amenities, with no more than 60 characters per amenity.");
+      return;
+    }
+    const payload = {
+      name: form.name,
+      description: form.description,
+      capacity: Number(form.capacity),
+      location: form.location,
+      category: form.category,
+      amenities,
+    };
+    if (!editingId) {
+      payload.booking_mode = form.booking_mode;
+      if (seatSpace) payload.seat_tier = Number(form.seat_tier);
+    }
+    setSaving(true);
 
     try {
       const saved = editingId
@@ -125,7 +154,7 @@ export default function AdminFacilitiesPage() {
     try {
       const updated = await deactivateFacility(token, facility.id);
       setFacilities((current) => current.map((item) => (item.id === updated.id ? updated : item)));
-      setNotice(`${updated.name} is now hidden from students.`);
+      setNotice(`${updated.name} is now hidden from the public directory.`);
       if (editingId === facility.id) resetForm();
     } catch (error) {
       setNotice(`Could not deactivate ${facility.name}: ${error.message}`);
@@ -141,7 +170,7 @@ export default function AdminFacilitiesPage() {
     try {
       const updated = await updateFacility(token, facility.id, { is_active: true });
       setFacilities((current) => current.map((item) => (item.id === updated.id ? updated : item)));
-      setNotice(`${updated.name} is visible to students again.`);
+      setNotice(`${updated.name} is visible in the public directory again.`);
     } catch (error) {
       setNotice(`Could not restore ${facility.name}: ${error.message}`);
     } finally {
@@ -155,7 +184,7 @@ export default function AdminFacilitiesPage() {
         <div>
           <p className="eyebrow">ADMINISTRATOR · FACILITY MANAGEMENT</p>
           <h1>Shape the campus <em>directory.</em></h1>
-          <p>Add spaces, keep their details accurate, and control what students can book.</p>
+          <p>Manage facility details and what students and teachers can reserve.</p>
         </div>
         <div className="admin-stats" aria-label="Facility summary">
           <span><strong>{activeCount}</strong>Active</span>
@@ -184,12 +213,36 @@ export default function AdminFacilitiesPage() {
               <input name="location" value={form.location} onChange={updateForm} minLength="2" maxLength="160" required placeholder="e.g. Arts Block · Floor 2" />
             </label>
             <label>
-              Capacity
-              <input name="capacity" value={form.capacity} onChange={updateForm} type="number" min="1" max="10000" required placeholder="24" />
+              Facility category
+              <input name="category" value={form.category} onChange={updateForm} minLength="2" maxLength="40" required placeholder="e.g. Teaching" />
+            </label>
+            <label>
+              Booking type
+              <select name="booking_mode" value={form.booking_mode} onChange={updateForm} disabled={Boolean(editingId)}>
+                {Object.entries(bookingModes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+              {editingId && <small>The booking type is fixed after creation.</small>}
+            </label>
+            {seatSpace && (
+              <label>
+                Minimum seat pass tier
+                <select name="seat_tier" value={form.seat_tier} onChange={updateForm} disabled={Boolean(editingId)}>
+                  {SEAT_TIER_NAMES.map((name, index) => <option key={name} value={index + 1}>{name}</option>)}
+                </select>
+                {editingId && <small>The seat count and plan tier are fixed after creation.</small>}
+              </label>
+            )}
+            <label>
+              {seatSpace ? "Numbered seats" : "Capacity"}
+              <input name="capacity" value={form.capacity} onChange={updateForm} type="number" min="1" max="10000" required placeholder="24" disabled={Boolean(editingId && seatSpace)} />
             </label>
             <label>
               Description
-              <textarea name="description" value={form.description} onChange={updateForm} minLength="10" maxLength="2000" required rows="5" placeholder="Describe the space and what students can use it for." />
+              <textarea name="description" value={form.description} onChange={updateForm} minLength="10" maxLength="2000" required rows="4" placeholder="Describe the space and how people use it." />
+            </label>
+            <label>
+              Amenities (one per line)
+              <textarea name="amenities" value={form.amenities} onChange={updateForm} rows="3" placeholder={"Projector\nWi-Fi\nAir conditioning"} />
             </label>
             {formError && <p className="form-message error" role="alert">{formError}</p>}
             <button className="button primary" type="submit" disabled={saving}>
@@ -216,14 +269,17 @@ export default function AdminFacilitiesPage() {
                   </span>
                 </div>
                 <p>{facility.description}</p>
-                <div className="managed-meta"><span>{facility.location}</span><span>Capacity {facility.capacity}</span></div>
+                <div className="managed-meta">
+                  <span>{facility.location}</span><span>{facility.capacity} {facilityBookingMode(facility) === "study_seat" ? "seats" : "people"}</span>
+                  <span>{facility.category}</span><span>{bookingModes[facilityBookingMode(facility)]}</span>
+                </div>
               </div>
               <div className="managed-actions">
                 <button type="button" className="button outline compact" onClick={() => beginEdit(facility)}>Edit</button>
                 {facility.is_active ? (
                   confirmingId === facility.id ? (
                     <div className="confirm-actions">
-                      <small>Hide from students?</small>
+                      <small>Hide this facility?</small>
                       <button type="button" onClick={() => handleDeactivate(facility)} disabled={actionId === facility.id}>Yes, hide</button>
                       <button type="button" onClick={() => setConfirmingId(null)}>Keep</button>
                     </div>
