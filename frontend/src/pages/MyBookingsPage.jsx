@@ -69,25 +69,26 @@ export default function MyBookingsPage() {
   return (
     <section className="bookings-page">
       <header className="bookings-heading">
-        <div><p className="eyebrow">YOUR CAMPUS SCHEDULE</p><h1>My <em>bookings.</em></h1><p>Follow every request from submission to the administrator’s decision.</p></div>
+        <div><p className="eyebrow">YOUR CAMPUS SCHEDULE</p><h1>My <em>bookings.</em></h1><p>Find your seat number, check a venue request, or cancel a reservation.</p></div>
         <RouteLink className="button primary" to={directory}>Find another space</RouteLink>
       </header>
 
       {notice && <p className="admin-notice" role="status">{notice}</p>}
 
       <div className="booking-filter-row" aria-label="Filter bookings">
-        {FILTERS.map((item) => <button key={item} className={filter === item ? "active" : ""} type="button" onClick={() => setFilter(item)}>{item}</button>)}
+        {FILTERS.map((item) => <button key={item} className={filter === item ? "active" : ""} type="button" aria-pressed={filter === item} onClick={() => setFilter(item)}>{item === "approved" ? "confirmed" : item}</button>)}
       </div>
 
       {visibleBookings.length === 0 ? (
-        <div className="empty-state bookings-empty"><strong>No {filter === "all" ? "" : `${filter} `}bookings yet.</strong><p>Explore the directory when you are ready to reserve a space.</p><RouteLink className="inline-link" to={directory}>{user.role === "teacher" ? "Browse teaching spaces" : "Browse facilities"}</RouteLink></div>
+        <div className="empty-state bookings-empty"><strong>No bookings match this view.</strong><p>Explore the directory when you are ready to reserve a space.</p><RouteLink className="inline-link" to={directory}>{user.role === "teacher" ? "Browse teaching spaces" : "Browse facilities"}</RouteLink></div>
       ) : (
         <div className="booking-list">
           {visibleBookings.map((booking) => (
             <article className="booking-record card" key={booking.id}>
               <div className="booking-date-tile"><span>{new Date(booking.starts_at).toLocaleString(undefined, { month: "short" })}</span><strong>{new Date(booking.starts_at).getDate()}</strong></div>
               <div className="booking-record-copy">
-                <div className="managed-title-row"><h2>{booking.facility.name}</h2><span className={`booking-status ${booking.status}`}>{booking.status}</span></div>
+                <div className="managed-title-row"><h2>{booking.facility.name}</h2><span className={`booking-status ${booking.status}`}>{booking.status === "approved" ? "confirmed" : booking.status}</span></div>
+                <strong>{booking.seat_number ? `Seat ${booking.seat_number}` : "Whole space"}</strong>
                 <p className="booking-time">{formatBookingRange(booking.starts_at, booking.ends_at)}</p>
                 <p>{booking.purpose}</p>
                 <small>{booking.facility.location}</small>

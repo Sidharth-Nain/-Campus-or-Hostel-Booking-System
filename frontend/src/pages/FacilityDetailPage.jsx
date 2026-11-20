@@ -6,7 +6,7 @@ import BookingPanel from "../components/BookingPanel";
 import FacilityPhoto from "../components/FacilityPhoto";
 import { ErrorState, LoadingState } from "../components/PageState";
 import { RouteLink } from "../components/AppLayout";
-import { bookingModes, canRequestFacility, facilityBookingMode } from "../facilityBooking";
+import { canRequestFacility, facilityBookingLabel, facilityBookingMode } from "../facilityBooking";
 import "../facility.css";
 
 function FacilityAction({ facility, role }) {
@@ -14,23 +14,14 @@ function FacilityAction({ facility, role }) {
   const buttonClass = "button primary detail-book-button";
 
   if (role === "admin") return <RouteLink className={buttonClass} to="/admin/bookings">Review booking requests</RouteLink>;
-  if (mode === "study_seat" && role !== "teacher") {
-    return <RouteLink className={buttonClass} to={`/plans/${facility.id}`}>See compatible study passes</RouteLink>;
-  }
   if (!role) {
     const next = encodeURIComponent(`/facilities/${facility.id}`);
-    return <RouteLink className={buttonClass} to={`/login?next=${next}`}>Sign in to request a booking</RouteLink>;
+    return <RouteLink className={buttonClass} to={`/login?next=${next}`}>{facility.seat_layout ? "Sign in to book" : "Sign in to request the space"}</RouteLink>;
   }
   if (role === "teacher" && mode !== "teaching") {
     return <RouteLink className={buttonClass} to="/teaching">Find a teaching space</RouteLink>;
   }
-  if (!canRequestFacility(role, facility)) return null;
-
-  return (
-    <button className={buttonClass} type="button" onClick={() => document.getElementById("booking-form")?.focus()}>
-      {mode === "teaching" ? "Request the whole room" : "Request this facility"}
-    </button>
-  );
+  return null;
 }
 
 export default function FacilityDetailPage({ facilityId }) {
@@ -67,8 +58,8 @@ export default function FacilityDetailPage({ facilityId }) {
   const amenities = facility.amenities || [];
   return (
     <section className="facility-detail-page catalog-detail">
-      <RouteLink className="back-link" to={mode === "teaching" ? "/teaching" : "/facilities"}>
-        {mode === "teaching" ? "All teaching spaces" : "All facilities"}
+      <RouteLink className="back-link" to={role === "teacher" && mode === "teaching" ? "/teaching" : "/facilities"}>
+        {role === "teacher" && mode === "teaching" ? "All teaching spaces" : "All facilities"}
       </RouteLink>
       <div className="detail-layout">
         <div className="detail-image">
@@ -76,11 +67,11 @@ export default function FacilityDetailPage({ facilityId }) {
           <span className="facility-category">{facility.category || "Campus space"}</span>
         </div>
         <article className="detail-content">
-          <p className="eyebrow">{bookingModes[mode]}</p>
+          <p className="eyebrow facility-booking-kind">{facilityBookingLabel(facility)}</p>
           <h1>{facility.name}</h1>
           <p className="detail-description">{facility.description}</p>
           <dl className="detail-facts">
-            <div><dt>Capacity</dt><dd>{facility.capacity} {mode === "study_seat" ? "numbered seats" : "people"}</dd></div>
+            <div><dt>Capacity</dt><dd>{facility.capacity} {facility.seat_layout ? "numbered seats" : "people"}</dd></div>
             <div><dt>Location</dt><dd>{facility.location}</dd></div>
           </dl>
           <div className="catalog-amenities">
@@ -88,13 +79,15 @@ export default function FacilityDetailPage({ facilityId }) {
             {amenities.length ? <ul className="amenity-list">{amenities.map((amenity) => <li key={amenity}>{amenity}</li>)}</ul>
               : <p className="muted">Amenities have not been listed for this space yet.</p>}
           </div>
-          {mode === "teaching" && <p className="facility-use-note">Teachers request the full space for a class or workshop. The room is reserved for that session once an administrator approves it.</p>}
-          {mode === "study_room" && <p className="facility-use-note">For study only. Class and workshop bookings must use a designated teaching space.</p>}
-          {mode === "study_seat" && <p className="facility-use-note">Student study passes hold one numbered seat for the full plan term. They do not reserve the whole room.</p>}
+          {mode === "teaching" && <p className="facility-use-note">{facility.seat_layout ? "Students can book an individual desk. Teachers can request the whole classroom for a teaching session." : "Verified teachers can request the whole hall for a teaching session. An administrator reviews each request."}</p>}
+          {mode === "study_room" && <p className="facility-use-note">Book an individual seat for quiet study.</p>}
+          {mode === "study_seat" && <p className="facility-use-note">Book by the hour, or keep the same seat for several days with a <RouteLink className="inline-link" to={`/plans/${facility.id}`}>study pass</RouteLink>.</p>}
           <FacilityAction facility={facility} role={role} />
         </article>
+        {canRequestFacility(role, facility) && (
+          <BookingPanel key={`${facility.id}-${role}`} facility={facility} onFacilityChange={() => setRequestKey((value) => value + 1)} />
+        )}
       </div>
-      {canRequestFacility(role, facility) && <BookingPanel key={facility.id} facility={facility} />}
     </section>
   );
 }

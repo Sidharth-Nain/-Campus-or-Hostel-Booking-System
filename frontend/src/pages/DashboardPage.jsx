@@ -5,7 +5,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const firstName = user.full_name.split(" ")[0];
   const action = {
-    student: ["Make a study routine", "Reserve the same numbered seat for a fixed term.", "/plans", "Explore seat passes"],
+    student: ["Book a seat", "Choose a lab, classroom, or library, then pick an available seat on its floor plan.", "/facilities", "Find a seat"],
     teacher: ["Plan your next class", "Request a whole classroom or hall with the equipment you need.", "/teaching", "Find teaching rooms"],
     admin: ["Review booking requests", "See which students and teachers are waiting for a decision.", "/admin/bookings", "Open review queue"],
   }[user.role];

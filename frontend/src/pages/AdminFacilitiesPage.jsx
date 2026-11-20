@@ -9,7 +9,7 @@ import {
 import { useAuth } from "../auth/AuthContext";
 import { BRAND_NAME } from "../brand";
 import { ErrorState, LoadingState } from "../components/PageState";
-import { bookingModes, facilityBookingMode } from "../facilityBooking";
+import { facilityBookingLabel, facilityBookingMode } from "../facilityBooking";
 
 const EMPTY_FORM = {
   name: "",
@@ -19,10 +19,18 @@ const EMPTY_FORM = {
   category: "General",
   amenities: "",
   booking_mode: "standard",
+  seat_layout: "",
   seat_tier: "1",
 };
 
 const SEAT_TIER_NAMES = ["Focus Week", "Study Sprint", "Campus Desk", "Studio Desk"];
+const BOOKING_TYPES = {
+  standard: "Student space",
+  teaching: "Teaching room or hall",
+  study_room: "Study area",
+  study_seat: "Study area with seat passes",
+};
+const SEAT_LAYOUTS = { lab: "Lab workstations", library: "Library desks", classroom: "Classroom rows", studio: "Studio worktables" };
 
 function AdminAccessRequired() {
   return (
@@ -94,6 +102,7 @@ export default function AdminFacilitiesPage() {
       category: facility.category || "General",
       amenities: (facility.amenities || []).join("\n"),
       booking_mode: facilityBookingMode(facility),
+      seat_layout: facility.seat_layout || "",
       seat_tier: String(facility.seat_tier || 1),
     });
     setFormError("");
@@ -103,6 +112,11 @@ export default function AdminFacilitiesPage() {
 
   function updateForm(event) {
     const { name, value } = event.target;
+    if (name === "booking_mode") {
+      const defaultLayout = { standard: "", teaching: "", study_room: "library", study_seat: "library" };
+      setForm((current) => ({ ...current, booking_mode: value, seat_layout: defaultLayout[value] }));
+      return;
+    }
     setForm((current) => ({ ...current, [name]: value }));
   }
 
@@ -125,6 +139,7 @@ export default function AdminFacilitiesPage() {
     };
     if (!editingId) {
       payload.booking_mode = form.booking_mode;
+      payload.seat_layout = form.seat_layout || null;
       if (seatSpace) payload.seat_tier = Number(form.seat_tier);
     }
     setSaving(true);
@@ -219,9 +234,17 @@ export default function AdminFacilitiesPage() {
             <label>
               Booking type
               <select name="booking_mode" value={form.booking_mode} onChange={updateForm} disabled={Boolean(editingId)}>
-                {Object.entries(bookingModes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                {Object.entries(BOOKING_TYPES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
               </select>
               {editingId && <small>The booking type is fixed after creation.</small>}
+            </label>
+            <label>
+              Student seat map
+              <select name="seat_layout" value={form.seat_layout} onChange={updateForm} disabled={Boolean(editingId)}>
+                {["standard", "teaching"].includes(form.booking_mode) && <option value="">Whole space only</option>}
+                {Object.entries(SEAT_LAYOUTS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+              <small>{editingId ? "The seat map is fixed after creation." : "A seat map lets students book individual seats instantly."}</small>
             </label>
             {seatSpace && (
               <label>
@@ -233,7 +256,7 @@ export default function AdminFacilitiesPage() {
               </label>
             )}
             <label>
-              {seatSpace ? "Numbered seats" : "Capacity"}
+              {form.seat_layout ? "Numbered seats" : "Capacity"}
               <input name="capacity" value={form.capacity} onChange={updateForm} type="number" min="1" max="10000" required placeholder="24" disabled={Boolean(editingId && seatSpace)} />
             </label>
             <label>
@@ -270,8 +293,8 @@ export default function AdminFacilitiesPage() {
                 </div>
                 <p>{facility.description}</p>
                 <div className="managed-meta">
-                  <span>{facility.location}</span><span>{facility.capacity} {facilityBookingMode(facility) === "study_seat" ? "seats" : "people"}</span>
-                  <span>{facility.category}</span><span>{bookingModes[facilityBookingMode(facility)]}</span>
+                  <span>{facility.location}</span><span>{facility.capacity} {facility.seat_layout ? "seats" : "people"}</span>
+                  <span>{facility.category}</span><span>{facilityBookingLabel(facility)}</span>
                 </div>
               </div>
               <div className="managed-actions">

@@ -23,7 +23,9 @@ async function apiRequest(path, options = {}) {
 
   const data = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error(readableError(data?.detail));
+    const error = new Error(readableError(data?.detail));
+    error.status = response.status;
+    throw error;
   }
   return data;
 }

@@ -101,11 +101,25 @@
 .amenity-list li { padding: 4px 9px; border-radius: 6px; color: #483584; background: #f2edfc; font-size: .875rem; line-height: 1.35; }
 .catalog-page .facility-meta { flex-wrap: wrap; gap: 5px 12px; border-color: var(--line); font-size: .875rem; }
 .catalog-page .facility-meta span:first-child { font-weight: 750; }
-.catalog-detail .detail-layout { grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); border-radius: 26px; }
-.catalog-detail .detail-image { min-height: 360px; }
+.catalog-detail .detail-layout {
+  --detail-pad: clamp(1.25rem, 3vw, 2.75rem);
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); border-radius: 26px;
+}
+.catalog-detail .detail-image { grid-area: 1 / 1 / 3 / 2; min-height: 360px; }
 .catalog-detail .detail-image img { position: absolute; inset: 0; }
-.catalog-detail .detail-content { padding: clamp(25px, 5vw, 54px); overflow-wrap: anywhere; }
-.catalog-detail .detail-content .eyebrow { font-size: .875rem; }
+.catalog-detail .detail-content { grid-area: 1 / 2; padding: var(--detail-pad); overflow-wrap: anywhere; }
+.catalog-detail .detail-layout:has(.reservation-panel) .detail-content { padding-bottom: 1rem; }
+.catalog-detail .facility-booking-kind {
+  align-self: flex-start;
+  margin: 0;
+  max-width: 100%;
+  padding: .35rem .7rem;
+  border-radius: .45rem;
+  color: #fff;
+  background: var(--clay-dark);
+  font: 700 .875rem/1.4 var(--body);
+  letter-spacing: .04em;
+}
 .catalog-detail .detail-content h1 { font-size: clamp(2.35rem, 5.2vw, 4.3rem); line-height: .99; }
 .catalog-detail .detail-facts { margin-top: 25px; }
 .catalog-detail .detail-facts div:last-child { grid-column: auto; }
@@ -115,42 +129,86 @@
 .catalog-amenities h2 { margin: 0 0 8px; font-family: var(--body); font-size: 1rem; font-weight: 750; }
 .catalog-amenities .amenity-list { margin-bottom: 0; }
 .facility-use-note { margin: 22px 0 0; padding: 12px 14px; border-radius: 10px; color: #3b2b70; background: #f7f3ff; line-height: 1.5; }
-.catalog-booking-panel {
-  scroll-margin-top: 125px;
-  gap: clamp(24px, 5vw, 54px);
-  border: 1px solid #e7e0f9;
-  border-radius: 26px;
-  color: var(--ink);
-  background: #faf8ff;
-  box-shadow: none;
+
+.catalog-detail .reservation-panel {
+  grid-area: 2 / 2; align-self: start; min-width: 0;
+  margin: 0 var(--detail-pad) var(--detail-pad); padding: clamp(1rem, 2vw, 1.4rem);
+  display: grid; gap: 1rem; color: #fff; background: #38235f; border-radius: 1rem;
 }
-.catalog-booking-panel:focus-visible { outline: 2px solid #613cc2; outline-offset: 4px; }
-.catalog-booking-panel .booking-panel-heading .eyebrow { color: #4b3191; font-size: .875rem; }
-.catalog-booking-panel .booking-panel-heading h2 { font-size: clamp(2rem, 4vw, 3.1rem); line-height: 1.05; }
-.catalog-booking-panel .booking-panel-heading > span { margin-top: 1rem; border-color: #dcd2f0; color: #4b3191; font-size: .875rem; }
-.catalog-booking-panel .booking-panel-copy { margin: 12px 0 0; color: var(--muted); line-height: 1.6; }
-.catalog-booking-panel .booking-form label { min-width: 0; color: var(--ink); font-size: .875rem; }
-.catalog-booking-panel .booking-form input, .catalog-booking-panel .booking-form textarea { min-width: 0; border-color: #dcd2f0; color: var(--ink); background: #fff; color-scheme: light; font-size: 1rem; }
-.catalog-booking-panel .booking-form textarea::placeholder { color: var(--muted); }
-.catalog-booking-panel .booking-form :is(input, textarea):focus-visible { outline: 2px solid #613cc2; outline-offset: 2px; box-shadow: none; }
-.catalog-booking-panel .outline { border-color: #dcd2f0; color: #432486; }
-.catalog-booking-panel .outline:hover:not(:disabled) { color: #fff; background: #432486; }
-.catalog-booking-panel .availability-result.available { color: #235749; background: #e7f4ee; }
-.catalog-booking-panel .availability-result.unavailable { color: #832b24; background: #fbece9; }
-.catalog-booking-panel .availability-result, .catalog-booking-panel .form-message { font-size: .875rem; }
-.catalog-booking-panel .availability-result span { color: #fff; }
-.catalog-booking-panel .booking-success { border-color: #dcd2f0; background: #fff; }
-.catalog-booking-panel .booking-success > span { color: #49318a; background: #eee8fb; }
-.catalog-booking-panel .booking-success p { color: var(--muted); font-size: .875rem; }
-.catalog-booking-panel .booking-success .inline-link { color: #49318a; font-size: .875rem; }
+.reservation-panel .booking-panel-heading { display: flex; align-items: center; gap: .6rem; }
+.reservation-panel .reservation-clock { flex: none; color: #e5d9ff; }
+.reservation-panel .booking-panel-heading h2 {
+  margin: 0; color: #fff; font: 700 1.3rem/1.25 var(--body); letter-spacing: -.025em;
+}
+.reservation-panel .booking-form { min-width: 0; gap: .75rem; }
+.reservation-panel .booking-time-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  align-items: start; gap: .6rem .8rem;
+}
+.reservation-panel .booking-form label { min-width: 0; color: #fff; font: 600 .9rem/1.4 var(--body); }
+.reservation-panel .booking-form :is(input, textarea) {
+  box-sizing: border-box; width: 100%; min-width: 0; min-height: 2.75rem; max-width: 100%;
+  padding: .55rem .65rem; border: 1px solid #d5cae4; border-radius: .5rem;
+  background: #fff; color: #23182f; color-scheme: light; font: 400 1rem/1.4 var(--body);
+}
+.reservation-panel .booking-form textarea::placeholder { color: #62576e; }
+.reservation-panel .time-lookup-actions {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 1rem;
+}
+.reservation-panel .time-lookup-actions p { margin: 0; color: #eadffd; font-size: .875rem; }
+.catalog-detail .reservation-panel .button {
+  min-height: 2.6rem; padding: .55rem 1.1rem; border: 1px solid #bcaae7;
+  background: #6545a8; color: white; font: 700 1rem/1.35 var(--body); box-shadow: none;
+}
+.catalog-detail .reservation-panel .button:hover:not(:disabled) { background: #503485; color: #fff; }
+.reservation-panel :is(.button, input, textarea):focus-visible { outline: 3px solid #e3cbff; outline-offset: 2px; }
+.reservation-panel .whole-confirmation { display: grid; gap: .75rem; }
+.reservation-panel .whole-confirmation .button { justify-self: start; }
+.reservation-panel .availability-result, .reservation-panel .booking-error, .booking-results .booking-error {
+  display: block; margin: 0; padding: .65rem .85rem; border-radius: .55rem; font-size: .95rem; line-height: 1.5;
+}
+.reservation-panel .availability-result.available { color: #174733; background: #e3f4e9; }
+.reservation-panel .availability-result.unavailable, .reservation-panel .booking-error, .booking-results .booking-error {
+  color: #74251f; background: #fff0ea;
+}
+.reservation-panel .booking-success {
+  grid-column: auto; display: grid; grid-template-columns: 1fr; gap: .8rem;
+  padding: 1rem; color: #23182f; background: #fff; border: 0; border-radius: .6rem;
+}
+.reservation-panel .booking-success strong { color: #35215b; font: 700 1.125rem/1.4 var(--body); }
+.reservation-panel .booking-success p { margin: .2rem 0 0; color: #4c4356; font-size: .95rem; }
+.reservation-panel .booking-success .inline-link { grid-column: auto; justify-self: start; color: #4c288b; font-size: .95rem; }
+.reservation-panel :is(.availability-result, .booking-success), .catalog-detail .booking-results { scroll-margin-top: 6rem; }
+
+.catalog-detail .booking-results {
+  grid-column: 1 / -1; min-width: 0; padding: var(--detail-pad);
+  border-top: 1px solid #e1d7ec; color: var(--ink); background: #faf8ff;
+}
+.booking-results .booking-error { margin-bottom: 1rem; }
+.seat-confirmation {
+  display: grid; align-items: start; grid-template-columns: minmax(0, 1fr) minmax(12rem, .45fr);
+  gap: clamp(1rem, 3vw, 2rem);
+}
+.seat-ticket {
+  display: grid; gap: .5rem; min-width: 0; padding: clamp(1rem, 2.5vw, 1.65rem);
+  border: 1px solid #dcd2eb; border-radius: 1rem; background: white;
+}
+.seat-ticket h3 { margin: .15rem 0; font-size: 1.5rem; line-height: 1.15; }
+.seat-ticket p { margin: 0; overflow-wrap: anywhere; }
+.seat-ticket p, .seat-ticket small { color: #52495e; font-size: .95rem; line-height: 1.5; }
+.seat-ticket small, .seat-ticket .seat-notice { margin-top: .5rem; padding-top: .85rem; border-top: 1px dashed #d9cee9; }
+.seat-ticket .seat-notice { color: #733125; }
+.seat-ticket .button { margin-top: .35rem; }
 
 @media (max-width: 850px) {
   .catalog-detail .detail-layout { grid-template-columns: 1fr; }
   .catalog-detail .detail-image { min-height: clamp(205px, 50vw, 360px); }
+  .catalog-detail .detail-layout > :is(.detail-image, .detail-content, .reservation-panel) { grid-area: auto / 1; }
 }
 @media (max-width: 650px) {
   .catalog-page .directory-heading, .teacher-access-note { align-items: start; flex-direction: column; gap: 15px; }
   .catalog-filters { flex-direction: column; align-items: stretch; }
   .catalog-filters .directory-search { flex: auto; }
   .catalog-detail .detail-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .seat-confirmation { grid-template-columns: minmax(0, 1fr); }
 }

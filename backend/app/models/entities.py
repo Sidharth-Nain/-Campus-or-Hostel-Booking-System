@@ -43,6 +43,7 @@ class Facility(Base):
         UniqueConstraint("name", "location", name="facilities_name_location_unique"),
         CheckConstraint("capacity > 0", name="facilities_capacity_positive"),
         CheckConstraint("booking_mode IN ('standard', 'teaching', 'study_room', 'study_seat')", name="facilities_booking_mode_valid"),
+        CheckConstraint("seat_layout IN ('lab', 'classroom', 'library', 'studio')", name="facilities_seat_layout_valid"),
         CheckConstraint(
             "(booking_mode = 'study_seat' AND seat_tier IS NOT NULL AND seat_tier BETWEEN 1 AND 4)"
             " OR (booking_mode <> 'study_seat' AND seat_tier IS NULL)",
@@ -59,6 +60,7 @@ class Facility(Base):
     amenities: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]", nullable=False)
     booking_mode: Mapped[str] = mapped_column(String(20), default="standard", server_default="standard", nullable=False)
     seat_tier: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    seat_layout: Mapped[str | None] = mapped_column(String(20))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -70,12 +72,14 @@ class Booking(Base):
     __tablename__ = "bookings"
     __table_args__ = (
         CheckConstraint("ends_at > starts_at", name="bookings_valid_interval"),
+        CheckConstraint("seat_number > 0", name="bookings_seat_positive"),
         Index("bookings_facility_time_idx", "facility_id", "starts_at", "ends_at"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
     facility_id: Mapped[int] = mapped_column(ForeignKey("facilities.id", ondelete="RESTRICT"), nullable=False)
+    seat_number: Mapped[int | None] = mapped_column(Integer)
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     purpose: Mapped[str] = mapped_column(String(500), nullable=False)

@@ -57,7 +57,7 @@ def check_seat_availability(
     if student_has_pass(database, student.id, starts_on, ends_on):
         seats, message = [], OWN_PASS_CONFLICT
     else:
-        taken = occupied_seats(database, facility.id, starts_on, ends_on)
+        taken = occupied_seats(database, facility, starts_on, ends_on)
         seats = [seat for seat in range(1, facility.capacity + 1) if seat not in taken]
         message = None if seats else "No seats are available for the full period."
     return SeatPassAvailability(
@@ -74,7 +74,7 @@ def reserve_seat(payload: SeatPassCreate, database: DatabaseSession, student: Cu
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "That seat does not exist at this facility.")
     if student_has_pass(database, student.id, payload.starts_on, ends_on):
         raise HTTPException(status.HTTP_409_CONFLICT, OWN_PASS_CONFLICT)
-    if payload.seat_number in occupied_seats(database, facility.id, payload.starts_on, ends_on):
+    if payload.seat_number in occupied_seats(database, facility, payload.starts_on, ends_on):
         raise HTTPException(status.HTTP_409_CONFLICT, "That seat is already reserved for part of this period.")
 
     reservation = SeatPass(

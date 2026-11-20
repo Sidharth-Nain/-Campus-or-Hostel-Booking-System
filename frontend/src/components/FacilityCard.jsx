@@ -1,10 +1,9 @@
 import { RouteLink } from "./AppLayout";
 import FacilityPhoto from "./FacilityPhoto";
-import { bookingModes, facilityBookingMode } from "../facilityBooking";
+import { facilityBookingLabel } from "../facilityBooking";
 
 export default function FacilityCard({ facility }) {
   const amenities = facility.amenities || [];
-  const mode = facilityBookingMode(facility);
 
   return (
     <article className="facility-card card">
@@ -22,7 +21,7 @@ export default function FacilityCard({ facility }) {
             {amenities.length > 3 && <li>+{amenities.length - 3} more</li>}
           </ul>
         )}
-        <div className="facility-meta"><span>{facility.capacity} {mode === "study_seat" ? "seats" : "people"}</span><span>{bookingModes[mode]}</span></div>
+        <div className="facility-meta"><span>{facility.capacity} {facility.seat_layout ? "seats" : "people"}</span><span>{facilityBookingLabel(facility)}</span></div>
         <RouteLink className="button outline" to={`/facilities/${facility.id}`}>View details</RouteLink>
       </div>
     </article>

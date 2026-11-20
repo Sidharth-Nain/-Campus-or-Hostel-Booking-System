@@ -5,7 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import { RouteLink } from "../components/AppLayout";
 import FacilityCard from "../components/FacilityCard";
 import { ErrorState, LoadingState } from "../components/PageState";
-import { bookingModes, facilityBookingMode } from "../facilityBooking";
+import { facilityBookingLabel, facilityBookingMode } from "../facilityBooking";
 import "../facility.css";
 
 export default function FacilityListPage({ teachingOnly = false }) {
@@ -50,7 +50,7 @@ export default function FacilityListPage({ teachingOnly = false }) {
     return directory.filter((facility) => {
       if (selectedCategory && facility.category !== selectedCategory) return false;
       const searchable = [facility.name, facility.location, facility.description, facility.category,
-        bookingModes[facilityBookingMode(facility)], ...(facility.amenities || [])];
+        facilityBookingLabel(facility), ...(facility.amenities || [])];
       return searchable.join(" ").toLowerCase().includes(normalizedQuery);
     });
   }, [directory, query, selectedCategory]);
@@ -66,13 +66,13 @@ export default function FacilityListPage({ teachingOnly = false }) {
           <h1>{teachingOnly ? "A whole room for your next class." : "Find a campus space."}</h1>
           <p>{teachingOnly
             ? "Request an entire classroom or lecture hall for a lesson or workshop. Libraries and study areas stay separate."
-            : "Find the right fit by capacity, location, and amenities, from a numbered study seat to a teaching hall."}</p>
+            : "Choose a seat in a lab, library, or classroom, or request a whole venue for your group."}</p>
         </div>
         {!teachingOnly && <RouteLink className="button outline" to="/teaching">Browse teaching spaces</RouteLink>}
       </header>
       {teachingOnly && user?.role !== "teacher" && (
         <aside className="teacher-access-note">
-          <p><strong>Whole-room bookings require a teacher account.</strong> The campus team enables teacher access on existing accounts.</p>
+          <p><strong>Teachers can request a whole teaching room.</strong> Students can book individual seats in classrooms with a seat map.</p>
           {!user && <RouteLink className="button outline" to={`/login?next=${encodeURIComponent("/teaching")}`}>Sign in</RouteLink>}
         </aside>
       )}

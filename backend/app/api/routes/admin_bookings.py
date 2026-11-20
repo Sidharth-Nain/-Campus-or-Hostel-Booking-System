@@ -12,7 +12,7 @@ from app.api.deps import get_current_admin
 from app.database import get_db
 from app.models import Booking, BookingStatus, Facility, User
 from app.schemas.booking import AdminBookingRead
-from app.services.booking_conflicts import approved_conflict_id
+from app.services.booking_conflicts import lock_booking_writes, reservation_conflicts
 from app.services.notifications import send_booking_decision_email
 
 
@@ -30,9 +30,14 @@ def booking_with_details_statement():
     )
 
 
-def get_booking_for_review(booking_id: int, database: Session) -> Booking:
+def get_booking_for_review(booking_id: int, database: Session, *, lock: bool = False) -> Booking:
     """Return one booking with review details or a clear 404 response."""
 
+    if lock:
+        facility_id = database.scalar(select(Booking.facility_id).where(Booking.id == booking_id))
+        if facility_id is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Booking not found.")
+        lock_booking_writes(database, facility_id)
     booking = database.scalar(
         booking_with_details_statement().where(Booking.id == booking_id)
     )
@@ -81,7 +86,7 @@ def approve_booking(
 ) -> Booking:
     """Approve a pending request when its facility interval remains available."""
 
-    booking = get_booking_for_review(booking_id, database)
+    booking = get_booking_for_review(booking_id, database, lock=True)
     ensure_pending(booking)
 
     facility = database.get(Facility, booking.facility_id)
@@ -91,17 +96,18 @@ def approve_booking(
             detail="This facility is no longer active.",
         )
 
-    conflict = approved_conflict_id(
+    conflict = reservation_conflicts(
         database,
         booking.facility_id,
         booking.starts_at,
         booking.ends_at,
+        seat_number=booking.seat_number,
         exclude_booking_id=booking.id,
     )
-    if conflict is not None:
+    if conflict:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="An approved booking already occupies this facility and time.",
+            detail="An existing reservation occupies this space during the requested time.",
         )
 
     booking.status = BookingStatus.APPROVED
@@ -140,7 +146,7 @@ def reject_booking(
 ) -> Booking:
     """Reject a pending request and record who made the decision."""
 
-    booking = get_booking_for_review(booking_id, database)
+    booking = get_booking_for_review(booking_id, database, lock=True)
     ensure_pending(booking)
     booking.status = BookingStatus.REJECTED
     booking.reviewed_by = current_admin.id

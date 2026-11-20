@@ -7,6 +7,8 @@ The live Campus Flow app is the React frontend; the root HTML prototype is an ea
 ## What you can try now
 
 - Browse the 20-space starter catalog and check capacity, amenities, and booking type.
+- In Computer Lab 3, a classroom, or a library, choose a time, select an available numbered seat on the floor plan, and confirm it instantly. Students can share the room during the same slot.
+- Request a whole sports venue or seminar hall and follow the administrator's decision in **My bookings**.
 - Use a verified teacher account to request a full classroom or teaching hall. Libraries and study areas are not teaching venues.
 - Use a student account to compare four seat passes, find a numbered seat, and reserve it for the whole 7-, 14-, or 30-day term. Pass prices are illustrative; there is no payment or auto-renewal.
 - Open the homepage for student and teacher booking examples and six FAQs.
@@ -46,7 +48,7 @@ Campus Flow aims to address these challenges through a unified booking and manag
 
 ## 03. Our Approach
 
-Campus Flow uses request-and-approval for one-time bookings. Student seat passes reserve an available seat immediately for a fixed term.
+Campus Flow confirms numbered seats immediately for a single session or a fixed-term study pass. Whole venues go through administrative review.
 
 Users will be able to browse campus facilities, select a preferred date and time, and submit a reservation request.
 
@@ -168,8 +170,7 @@ Potential improvements beyond the initial challenge:
 | SQLite                | Initial development database          |
 | PostgreSQL            | Target production database            |
 | Git & GitHub          | Version control and progress tracking |
-| Vercel                | Planned frontend hosting              |
-| Render                | Planned backend hosting               |
+| Render                | Web hosting and managed PostgreSQL    |
 
 The final technology choices may be adjusted based on deployment compatibility, development constraints, and project requirements.
 
@@ -309,6 +310,7 @@ The initial database will contain three primary entities.
 | id          | Unique reservation identifier             |
 | user_id     | Reference to requesting user              |
 | facility_id | Reference to selected facility            |
+| seat_number | Numbered seat, or empty for a whole-space booking |
 | start_time  | Reservation start                         |
 | end_time    | Reservation end                           |
 | purpose     | Reason for reservation                    |
@@ -343,11 +345,11 @@ The backend checks whether:
 
 - The facility exists and is active.
 - The requested time range is valid.
-- The selected time does not conflict with an existing reservation or blocked pending request.
+- The resource is free for the requested interval. An approved whole-room booking occupies every seat.
 
 **Step 5 — Request Submission**
 
-A valid request is stored with the status `pending`.
+A student selects a free seat on the map to receive immediate confirmation. A whole-space request is stored with the status `pending`.
 
 **Step 6 — Administrative Review**
 
@@ -363,8 +365,8 @@ The user can view the final decision through their dashboard.
 
 - A reservation must have a valid start and end time.
 - Users cannot reserve inactive facilities.
-- Overlapping approved reservations for the same facility are prohibited.
-- Conflicting pending requests will be blocked in the initial implementation.
+- Different students can reserve different seats at the same time. A confirmed seat blocks an overlapping booking for that seat or for the entire room. A student may hold one single-session booking at a time in that facility.
+- Competing whole-space requests can be pending. The administrator can approve a request only while the entire venue is available.
 - Users can cancel only their own eligible bookings.
 - Only authorized administrators can approve or reject requests.
 - Booking conflict checks must be enforced by the backend and protected against concurrent updates.
@@ -465,25 +467,11 @@ Campus Flow will be tested across functionality, validation, security, and usabi
 
 ## 13. Deployment Strategy
 
-The application is planned to be deployed using separate hosting services.
+The Render Blueprint builds the React app and serves it alongside FastAPI at one HTTPS address. It provisions a separate PostgreSQL database for accounts and bookings, connects it over Render’s private network, and generates the signing key for login sessions. New databases start with the campus facility catalog.
 
-**Frontend — Vercel**
+Push the project to the repository's main branch, open the deployment link, and review the free web service and database. Once Render reports the service is live, open its public URL and check the directory and `/api/v1/health`. [Deploy Campus Flow on Render](https://render.com/deploy?repo=https://github.com/Sidharth-Nain/-Campus-or-Hostel-Booking-System)
 
-The React application will be built and deployed as a publicly accessible website.
-
-**Backend — Render**
-
-The FastAPI application will be hosted as a web service exposing HTTPS API endpoints.
-
-**Database — Hosted PostgreSQL**
-
-A managed PostgreSQL database will store persistent application data.
-
-**Environment Configuration**
-
-Database credentials, authentication secrets, and deployment-specific settings will be managed using environment variables rather than hardcoded values.
-
-The live application will be tested after deployment to verify communication between all components.
+The free PostgreSQL database expires after 30 days. Export or move the database before then to retain accounts and bookings. [Render free hosting details](https://render.com/docs/free)
 
 ## 14. Development Principles
 

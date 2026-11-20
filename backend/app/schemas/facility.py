@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, Validation
 
 
 BookingMode = Literal["standard", "teaching", "study_room", "study_seat"]
+SeatLayout = Literal["lab", "classroom", "library", "studio"]
 Amenity = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=60)]
 Category = Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=40)]
 
@@ -21,6 +22,7 @@ class FacilityFields(BaseModel):
     amenities: list[Amenity] = Field(default_factory=list, max_length=12)
     booking_mode: BookingMode = "standard"
     seat_tier: int | None = Field(default=None, ge=1, le=4)
+    seat_layout: SeatLayout | None = None
 
     @field_validator("name", "description", "location")
     @classmethod
@@ -41,6 +43,8 @@ class FacilityCreate(FacilityFields):
     def validate_seat_tier(self) -> Self:
         if (self.booking_mode == "study_seat") != (self.seat_tier is not None):
             raise ValueError("Set a plan tier only for numbered-seat facilities.")
+        if self.booking_mode in {"study_room", "study_seat"} and self.seat_layout is None:
+            self.seat_layout = "library"
         return self
 
 
@@ -55,6 +59,7 @@ class FacilityUpdate(BaseModel):
     amenities: list[Amenity] | None = Field(default=None, max_length=12)
     booking_mode: BookingMode | None = None
     seat_tier: int | None = Field(default=None, ge=1, le=4)
+    seat_layout: SeatLayout | None = None
     is_active: bool | None = None
 
     @model_validator(mode="after")
@@ -63,7 +68,7 @@ class FacilityUpdate(BaseModel):
 
         if any(
             value is None for field, value in self.model_dump(exclude_unset=True).items()
-            if field != "seat_tier"
+            if field not in {"seat_tier", "seat_layout"}
         ):
             raise ValueError("Updated facility fields cannot be null.")
         return self
@@ -95,5 +100,6 @@ class FacilityRead(BaseModel):
     amenities: list[str]
     booking_mode: BookingMode
     seat_tier: int | None
+    seat_layout: SeatLayout | None
 
     model_config = ConfigDict(from_attributes=True)

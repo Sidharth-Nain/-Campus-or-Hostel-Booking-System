@@ -11,6 +11,7 @@ class Settings(BaseSettings):
 
     app_name: str = "Campus Flow API"
     environment: str = "development"
+    frontend_dist: Path | None = None
     api_v1_prefix: str = "/api/v1"
     # SQLite keeps local learning setup simple. PostgreSQL is enabled by DATABASE_URL.
     database_url: str = "sqlite:///./campusflow.db"

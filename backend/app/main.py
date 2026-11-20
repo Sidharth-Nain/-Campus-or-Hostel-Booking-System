@@ -4,12 +4,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.router import api_router
 from app.core.config import get_settings
 from app.database import Base, SessionLocal, engine
 from app.models import Facility  # Import models before metadata is created.
-from app.services.database_guards import ensure_postgres_booking_guards
+from app.services.database_guards import ensure_booking_guards
 from app.services.seed import seed_facilities, upgrade_facility_catalog
 
 
@@ -22,7 +23,7 @@ async def lifespan(_: FastAPI):
 
     Base.metadata.create_all(bind=engine)
     upgrade_facility_catalog(engine)
-    ensure_postgres_booking_guards(engine)
+    ensure_booking_guards(engine)
     with SessionLocal() as database:
         seed_facilities(database)
     yield
@@ -46,7 +47,6 @@ app.add_middleware(
 app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 
-@app.get("/", tags=["system"], summary="Describe the API service")
 def root() -> dict[str, str]:
     """Provide a small landing response for a running local API."""
 
@@ -55,3 +55,10 @@ def root() -> dict[str, str]:
         "documentation": "/docs",
         "health_check": f"{settings.api_v1_prefix}/health",
     }
+
+
+if settings.frontend_dist is None:
+    app.get("/", tags=["system"], summary="Describe the API service")(root)
+else:
+    # Keep the API and its docs ahead of the frontend's root mount.
+    app.mount("/", StaticFiles(directory=settings.frontend_dist, html=True), name="frontend")

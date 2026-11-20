@@ -4,7 +4,6 @@ import { approveBooking, getAdminBookings, rejectBooking } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { ErrorState, LoadingState } from "../components/PageState";
 import { formatBookingRange } from "../dateTime";
-import { bookingModes, facilityBookingMode } from "../facilityBooking";
 
 const FILTERS = ["pending", "all", "approved", "rejected", "cancelled"];
 
@@ -64,8 +63,8 @@ export default function AdminBookingsPage() {
   return (
     <section className="admin-bookings-page">
       <header className="review-heading">
-        <div><p className="eyebrow">ADMINISTRATOR · BOOKING REVIEW</p><h1>Review booking requests.</h1><p>Review student and teacher requests before approving or declining a booking.</p></div>
-        <span className="review-count"><strong>{bookings.length}</strong>{filter === "all" ? "Requests" : filter}</span>
+        <div><p className="eyebrow">ADMINISTRATOR · BOOKING REVIEW</p><h1>Review booking requests.</h1><p>Decide pending whole-space requests here. Instant seat bookings appear under Approved.</p></div>
+        <span className="review-count"><strong>{bookings.length}</strong>{filter === "all" ? "Bookings" : filter}</span>
       </header>
 
       {notice && <p className="admin-notice" role="status">{notice}</p>}
@@ -80,13 +79,13 @@ export default function AdminBookingsPage() {
         <div className="review-grid">
           {bookings.map((booking) => (
             <article className="review-card card" key={booking.id}>
-              <div className="review-card-top"><span className={`booking-status ${booking.status}`}>{booking.status}</span><small>Request #{booking.id}</small></div>
+              <div className="review-card-top"><span className={`booking-status ${booking.status}`}>{booking.status}</span><small>Booking #{booking.id}</small></div>
               <h2>{booking.facility.name}</h2>
               <p className="review-time">{formatBookingRange(booking.starts_at, booking.ends_at)}</p>
               <dl className="review-facts">
                 <div><dt>Requester</dt><dd>{booking.requester.full_name}</dd><small>{booking.requester.email}</small></div>
                 <div><dt>Location</dt><dd>{booking.facility.location}</dd></div>
-                <div><dt>Booking type</dt><dd>{bookingModes[facilityBookingMode(booking.facility)]}</dd></div>
+                <div><dt>Reserved space</dt><dd>{booking.seat_number ? `Seat ${booking.seat_number} · Instant booking` : "Whole space"}</dd></div>
                 <div className="review-purpose"><dt>Purpose</dt><dd>{booking.purpose}</dd></div>
               </dl>
               {booking.status === "pending" && (

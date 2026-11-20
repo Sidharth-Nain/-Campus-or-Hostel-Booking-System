@@ -41,13 +41,13 @@ Open `http://127.0.0.1:5173` in the browser.
 - `#/dashboard` is protected and loads the profile through `GET /api/v1/auth/me`.
 - `#/facilities` loads active spaces through `GET /api/v1/facilities`.
 - `#/facilities/:id` loads one space through `GET /api/v1/facilities/{id}`.
-- `#/teaching` lists whole classrooms and halls reserved for verified teachers.
+- `#/teaching` lists rooms verified teachers can request for a class. Students can book individual seats in classrooms with a floor plan.
 - `#/plans` compares four demo plans and lets students reserve and manage numbered seats.
 - `#/bookings` shows a student's or teacher's one-time requests and cancellation controls.
 - `#/admin/bookings` shows the administrator review queue with approval and rejection actions.
 - `#/admin/facilities` lets administrators create, edit, deactivate, and restore facilities through the protected admin API.
 
-Students can check a time slot and submit a request directly from a facility detail page. Administrators can approve or reject it from the request queue, and the student sees the new status after refreshing My bookings.
+On a facility detail page, students choose a time and check availability. In a lab, library, or classroom with a seat map, selecting and confirming a free seat books it immediately. Whole-space requests for courts and seminar halls go to the administrator's request queue. My bookings shows the reserved seat number or whole-space status.
 
 The JWT is stored in local storage for this learning project. Logging out removes it.
 

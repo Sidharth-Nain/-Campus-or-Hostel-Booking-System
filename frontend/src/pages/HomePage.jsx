@@ -23,11 +23,11 @@ const EXAMPLES = {
 };
 
 const FAQ = [
-  ["What can I book as a student?", "Students can request eligible campus facilities for a single session. A seat pass reserves one numbered seat in a dedicated study area for a fixed term."],
+  ["What can I book as a student?", "Pick a time and a numbered seat in a lab, classroom, or library for instant confirmation. For courts and seminar venues, request the whole space. A study pass lets you keep the same desk for several days."],
   ["Can I teach in the library?", "No. Library and study spaces are for studying. Verified teachers can request an entire classroom or teaching hall from the teaching-room directory."],
   ["How do I get teacher access?", "Create an account, then ask your campus administrator to verify and enable teacher access. Picking an account type on a public form cannot grant teacher access."],
   ["Does a seat pass renew or charge me?", "No. This is a demo: the displayed INR prices are illustrative. Passes end automatically and the site does not collect payment or renew them."],
-  ["How does approval work?", "Single-session requests appear as pending until an administrator makes a decision. Demo seat passes are reserved immediately if the numbered seat is free for the whole term."],
+  ["How does approval work?", "Seats are confirmed as soon as you book. Whole-space requests go to an administrator, who checks availability again before approving. You can see the result in My bookings."],
   ["Can I cancel a booking or seat pass?", "Use My bookings to manage eligible single-session requests. The Seat passes page shows your passes and lets you release a seat pass that has not expired."],
 ];
 

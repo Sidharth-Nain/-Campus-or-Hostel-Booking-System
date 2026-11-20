@@ -33,16 +33,19 @@ class BookingInterval(BaseModel):
 
 
 class BookingCreate(BookingInterval):
-    """A student's request for one facility and time interval."""
+    """A seat reservation or whole-facility request for one time interval."""
 
     facility_id: int = Field(gt=0)
-    purpose: str = Field(min_length=3, max_length=500)
+    purpose: str | None = Field(default=None, min_length=3, max_length=500)
+    seat_number: int | None = Field(default=None, gt=0, strict=True)
 
     @field_validator("purpose")
     @classmethod
-    def clean_purpose(cls, value: str) -> str:
+    def clean_purpose(cls, value: str | None) -> str | None:
         """Remove surrounding whitespace and reject an empty reason."""
 
+        if value is None:
+            return None
         cleaned = value.strip()
         if len(cleaned) < 3:
             raise ValueError("Purpose must contain at least 3 characters.")
@@ -63,6 +66,8 @@ class BookingAvailabilityRead(BaseModel):
     ends_at: datetime
     is_available: bool
     message: str
+    available_seats: list[int] | None = None
+    seat_capacity: int | None = None
 
 
 class BookingRead(BaseModel):
@@ -73,6 +78,7 @@ class BookingRead(BaseModel):
     starts_at: datetime
     ends_at: datetime
     purpose: str
+    seat_number: int | None
     status: BookingStatus
     created_at: datetime
     facility: FacilityRead

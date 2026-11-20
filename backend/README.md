@@ -33,17 +33,17 @@ Then open these addresses in a browser:
 
 ## Student and teacher booking endpoints
 
-- `POST /api/v1/bookings/check-availability` checks a validated future interval without exposing another student's booking details.
-- `POST /api/v1/bookings` creates a pending facility request for the logged-in student or teacher.
+- `POST /api/v1/bookings/check-availability` accepts `facility_id`, `starts_at`, and `ends_at`. Students booking seats receive the available seat numbers. Whole-space checks return availability for the entire venue.
+- `POST /api/v1/bookings` with the same interval and a `seat_number` immediately confirms an available seat at a seat-enabled facility. Whole-space requests include a `purpose`, omit the seat number, and enter the pending queue.
 - `GET /api/v1/bookings` returns only the signed-in account's booking history.
 - `GET /api/v1/bookings/{booking_id}` returns one owned booking without exposing other students' data.
 - `PATCH /api/v1/bookings/{booking_id}/cancel` cancels an eligible pending or approved booking.
 
-Booking requests must be in the future, include a timezone, end after they start, and last no more than 12 hours. Approved reservations block overlapping time slots. A student also cannot submit a second pending or approved request that overlaps their own request for the same facility. Adjacent slots are allowed because the end time is treated as exclusive.
+Bookings must be in the future, include a timezone, end after they start, and last no more than 12 hours. A confirmed seat blocks that seat and an overlapping whole-room reservation. An approved whole-room booking blocks every seat. Different students can book different seats during the same interval. A student can hold one overlapping single-session booking per facility. Back-to-back bookings are allowed.
 
 Overlap checks are shared by availability, request creation, and administrator approval so all three paths use the same rule. On PostgreSQL, application startup installs an exclusion constraint as the final concurrency guard. If two administrators approve overlapping requests at almost the same time, the database accepts only one and the API returns a clear `409` response for the other.
 
-Teachers can only request whole teaching rooms. Students cannot request those rooms or reserve a dedicated numbered-seat space as a whole room. To enable teacher access for an existing student account, run `.venv/bin/python backend/scripts/promote_teacher.py teacher@example.com` from the project root, replacing the example address. Public signup does not grant the teacher role.
+Verified teachers can request entire teaching rooms. Students can reserve seats in shared classrooms and use the whole-space request flow for courts and seminar venues. To enable teacher access for an existing student account, run `.venv/bin/python backend/scripts/promote_teacher.py teacher@example.com` from the project root. Existing bookings without seat assignments retain their original whole-space coverage when the server upgrades the database.
 
 ## Student seat passes
 
@@ -52,7 +52,7 @@ Teachers can only request whole teaching rooms. Students cannot request those ro
 - `POST /api/v1/seat-passes` reserves a seat for the term; `GET /api/v1/seat-passes` lists the student's passes.
 - `PATCH /api/v1/seat-passes/{id}/cancel` releases the seat from a non-expired pass.
 
-Dates use Asia/Kolkata. The API returns an exclusive end date. A student can hold only one pass for overlapping dates. The plans do not charge, auto-renew, or send payment information anywhere.
+Dates use Asia/Kolkata. The API returns an exclusive end date. A reserved pass blocks hourly bookings for that seat throughout its term, and a confirmed hourly booking prevents a new pass from claiming that seat during the same interval. A student can hold only one pass for overlapping dates. The plans do not charge, auto-renew, or send payment information anywhere.
 
 ## Administrator booking endpoints
 

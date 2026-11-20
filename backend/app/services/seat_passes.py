@@ -1,7 +1,6 @@
 """Plan rules, interval checks, and transaction locks for numbered seats."""
 
-from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import date, datetime, time, timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy import false, select, update
@@ -10,9 +9,9 @@ from sqlalchemy.orm import Session
 from app.models import Facility, User
 from app.models.seat_pass import SeatPass
 from app.schemas.seat_pass import SeatPassPlan
+from app.services.booking_conflicts import CAMPUS_ZONE, occupied_seats_for_slot
 
 
-CAMPUS_ZONE = ZoneInfo("Asia/Kolkata")
 OWN_PASS_CONFLICT = "You already have a seat pass that overlaps these dates."
 SEAT_PASS_PLANS = (
     SeatPassPlan(id="focus-week", name="Focus Week", description="Keep one quiet desk for a week of focused study.", price_inr=99, days=7, tier=1),
@@ -45,7 +44,9 @@ def lock_pass_writes(database: Session, user_id: int) -> None:
     if database.get_bind().dialect.name == "sqlite":
         database.execute(update(SeatPass).where(false()).values(id=SeatPass.id))
     else:
-        database.execute(select(User.id).where(User.id == user_id).with_for_update()).scalar_one()
+        # NO KEY UPDATE serializes pass purchases by this student while allowing
+        # a simultaneous hourly booking to verify its foreign key to the user.
+        database.execute(select(User.id).where(User.id == user_id).with_for_update(key_share=True)).scalar_one()
 
 
 def get_seat_facility(
@@ -76,9 +77,9 @@ def student_has_pass(database: Session, user_id: int, starts_on: date, ends_on: 
     ) is not None
 
 
-def occupied_seats(database: Session, facility_id: int, starts_on: date, ends_on: date) -> set[int]:
-    return set(database.scalars(
-        select(SeatPass.seat_number)
-        .where(SeatPass.facility_id == facility_id, *overlapping_passes(starts_on, ends_on))
-        .distinct()
-    ))
+def occupied_seats(database: Session, facility: Facility, starts_on: date, ends_on: date) -> set[int]:
+    """Check the same numbered-seat inventory as hourly bookings for the entire pass."""
+
+    starts_at = datetime.combine(starts_on, time.min, CAMPUS_ZONE)
+    ends_at = datetime.combine(ends_on, time.min, CAMPUS_ZONE)
+    return occupied_seats_for_slot(database, facility, starts_at, ends_at)

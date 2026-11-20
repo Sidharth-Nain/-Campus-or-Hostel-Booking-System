@@ -1,5 +1,6 @@
 """Administrator CRUD routes for the campus facility directory."""
 
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -9,8 +10,9 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin
 from app.database import get_db
-from app.models import Facility, User
+from app.models import Booking, BookingStatus, Facility, User
 from app.schemas.facility import FacilityCreate, FacilityRead, FacilityUpdate
+from app.services.booking_conflicts import lock_booking_writes
 
 
 router = APIRouter(prefix="/admin/facilities")
@@ -102,6 +104,7 @@ def update_facility(
 ) -> Facility:
     """Edit details or restore an inactive facility."""
 
+    lock_booking_writes(database, facility_id)
     facility = get_managed_facility(facility_id, database)
     changes = payload.model_dump(exclude_unset=True)
     if changes.get("booking_mode", facility.booking_mode) != facility.booking_mode:
@@ -109,6 +112,8 @@ def update_facility(
             status_code=status.HTTP_409_CONFLICT,
             detail="A facility's booking type cannot change once created.",
         )
+    if changes.get("seat_layout", facility.seat_layout) != facility.seat_layout:
+        raise HTTPException(status.HTTP_409_CONFLICT, "A facility's seating layout is fixed after creation.")
     if changes.get("seat_tier", facility.seat_tier) != facility.seat_tier or (
         facility.booking_mode == "study_seat" and changes.get("capacity", facility.capacity) != facility.capacity
     ):
@@ -116,6 +121,19 @@ def update_facility(
             status_code=status.HTTP_409_CONFLICT,
             detail="The seat count and plan tier cannot be changed after creation.",
         )
+    if facility.seat_layout and changes.get("capacity", facility.capacity) < facility.capacity:
+        removed_booking = database.scalar(
+            select(Booking.id)
+            .where(
+                Booking.facility_id == facility.id,
+                Booking.seat_number > changes["capacity"],
+                Booking.status == BookingStatus.APPROVED,
+                Booking.ends_at > datetime.now(timezone.utc),
+            )
+            .limit(1)
+        )
+        if removed_booking is not None:
+            raise HTTPException(status.HTTP_409_CONFLICT, "The new capacity would remove a seat with an active reservation.")
     proposed_name = changes.get("name", facility.name)
     proposed_location = changes.get("location", facility.location)
     ensure_unique_location(database, proposed_name, proposed_location, facility.id)
@@ -132,6 +150,7 @@ def deactivate_facility(
 ) -> Facility:
     """Remove a facility from student pages without deleting booking history."""
 
+    lock_booking_writes(database, facility_id)
     facility = get_managed_facility(facility_id, database)
     facility.is_active = False
     return commit_facility(database, facility)

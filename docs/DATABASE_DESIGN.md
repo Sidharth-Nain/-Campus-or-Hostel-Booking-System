@@ -4,7 +4,9 @@
 
 This document preserves the original Day 2 SQL design. The current app creates and upgrades its database via SQLAlchemy at startup. The runtime catalog adds a verified `teacher` role, facility categories and amenities, and separate rules for whole-room bookings and numbered seats. A `seat_passes` table tracks the student, facility, numbered seat, fixed-term plan, date interval and cancellation status. The original SQL design is not a migration for the current app.
 
-The production database design targets PostgreSQL and contains three core entities: `users`, `facilities`, and `bookings`. The executable SQL design is in [schema.sql](../sql/schema.sql), while the running FastAPI application uses matching SQLAlchemy models and SQLite for simple local development.
+The running app stores a facility's floor plan type in `facilities.seat_layout`. A single-session booking stores a positive `bookings.seat_number` for a seat or NULL for a whole facility. Seat reservations start approved without a reviewer. Older reservations retain NULL and cover the whole space. Confirmed sessions for different seats may overlap. A whole-room approval conflicts with every occupied seat, and an active seat pass protects that seat for the campus-local dates of its term.
+
+The following sections describe the original three-table PostgreSQL design in [schema.sql](../sql/schema.sql). The runtime models also support SQLite for local development.
 
 ## Entity relationship summary
 
@@ -77,7 +79,7 @@ Two **approved** bookings for the same facility cannot overlap. The schema uses 
 - A booking from 10:00 to 11:00 conflicts with one from 10:30 to 11:30.
 - Pending, rejected, and cancelled requests do not block a time slot.
 
-`btree_gist` is enabled to allow the equality comparison on `facility_id` within the exclusion constraint. Campus Flow installs this PostgreSQL constraint during application startup and the approval endpoint handles its constraint-violation response, because two staff members might approve competing requests at nearly the same time.
+`btree_gist` supports the equality comparison on `facility_id` in the original exclusion constraint. The runtime PostgreSQL constraint also accounts for the seat number and whole-room coverage.
 
 The Day 12 conflict service applies the same half-open interval rule to three backend paths:
 

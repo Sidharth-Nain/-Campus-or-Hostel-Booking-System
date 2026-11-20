@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 import { getFacilities } from "../api/client";
-import { facilityBookingMode } from "../facilityBooking";
 import { RouteLink } from "./AppLayout";
 import FacilityPhoto from "./FacilityPhoto";
 import "../facility.css";
@@ -11,7 +10,7 @@ const PREVIEW_LIMIT = 9;
 
 function SpacePreview({ facility }) {
   const linkTitleId = `home-space-title-${facility.id}`;
-  const capacityUnit = facilityBookingMode(facility) === "study_seat" ? "seats" : "people";
+  const capacityUnit = facility.seat_layout ? "seats" : "people";
 
   return (
     <li className="home-space-card">

@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_current_user
@@ -15,7 +16,12 @@ from app.schemas.booking import (
     BookingCreate,
     BookingRead,
 )
-from app.services.booking_conflicts import approved_conflict_id, duplicate_student_request_id
+from app.services.booking_conflicts import (
+    duplicate_student_request_id,
+    lock_booking_writes,
+    occupied_seats_for_slot,
+    reservation_conflicts,
+)
 
 
 router = APIRouter(prefix="/bookings")
@@ -23,13 +29,19 @@ DatabaseSession = Annotated[Session, Depends(get_db)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-def get_owned_booking(booking_id: int, user_id: int, database: Session) -> Booking:
+def get_owned_booking(booking_id: int, user_id: int, database: Session, *, lock: bool = False) -> Booking:
     """Find a booking belonging to the current user without exposing other users' data."""
 
+    owned_booking = (Booking.id == booking_id, Booking.user_id == user_id)
+    if lock:
+        facility_id = database.scalar(select(Booking.facility_id).where(*owned_booking))
+        if facility_id is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Booking not found.")
+        lock_booking_writes(database, facility_id)
     booking = database.scalar(
         select(Booking)
         .options(joinedload(Booking.facility))
-        .where(Booking.id == booking_id, Booking.user_id == user_id)
+        .where(*owned_booking)
     )
     if booking is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found.")
@@ -62,15 +74,10 @@ def get_requestable_facility(facility_id: int, database: Session, requester: Use
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Teachers can reserve whole classrooms and teaching halls only. Libraries are for study.",
         )
-    if requester.role == UserRole.STUDENT and facility.booking_mode == "teaching":
+    if requester.role == UserRole.STUDENT and facility.booking_mode == "teaching" and not facility.seat_layout:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only verified teacher accounts can request this classroom or teaching hall.",
-        )
-    if facility.booking_mode == "study_seat":
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Use a study pass to book a numbered seat in this facility.",
         )
     return facility
 
@@ -85,49 +92,56 @@ def check_booking_availability(
     database: DatabaseSession,
     current_user: CurrentUser,
 ) -> BookingAvailabilityRead:
-    """Tell the UI whether an interval overlaps an approved reservation."""
+    """Return free seats or whole-space availability without identifying other students."""
 
-    get_requestable_facility(payload.facility_id, database, current_user)
-    conflict = approved_conflict_id(
-        database,
-        payload.facility_id,
-        payload.starts_at,
-        payload.ends_at,
-    )
-    is_available = conflict is None
+    facility = get_requestable_facility(payload.facility_id, database, current_user)
+    available_seats = None
+    if current_user.role == UserRole.STUDENT and facility.seat_layout:
+        occupied = occupied_seats_for_slot(database, facility, payload.starts_at, payload.ends_at)
+        available_seats = [seat for seat in range(1, facility.capacity + 1) if seat not in occupied]
+        available = bool(available_seats)
+        message = "Choose an available seat." if available else "No seats are free for the full time slot."
+    else:
+        available = not reservation_conflicts(database, facility.id, payload.starts_at, payload.ends_at)
+        message = "This space is available to request." if available else "A reservation overlaps this time slot."
+
+    if available and duplicate_student_request_id(
+        database, current_user.id, facility.id, payload.starts_at, payload.ends_at,
+    ) is not None:
+        available = False
+        message = "You already have an overlapping booking or request at this facility."
+
     return BookingAvailabilityRead(
-        facility_id=payload.facility_id,
-        starts_at=payload.starts_at,
-        ends_at=payload.ends_at,
-        is_available=is_available,
-        message=(
-            "This time slot is available."
-            if is_available
-            else "An approved booking overlaps this time slot."
-        ),
+        **payload.model_dump(), is_available=available, message=message, available_seats=available_seats,
+        seat_capacity=facility.capacity if available_seats is not None else None,
     )
 
 
-@router.post("", response_model=BookingRead, status_code=status.HTTP_201_CREATED, summary="Request a facility booking")
+@router.post("", response_model=BookingRead, status_code=status.HTTP_201_CREATED, summary="Reserve a seat or request a whole facility")
 def create_booking(
     payload: BookingCreate,
     database: DatabaseSession,
     current_user: CurrentUser,
 ) -> Booking:
-    """Create a pending request after basic facility and overlap validation."""
+    """Immediately confirm a numbered seat, or queue a whole-space request for review."""
 
-    get_requestable_facility(payload.facility_id, database, current_user)
+    lock_booking_writes(database, payload.facility_id)
+    facility = get_requestable_facility(payload.facility_id, database, current_user)
+    seat = payload.seat_number
+    if current_user.role == UserRole.STUDENT and facility.seat_layout:
+        if seat is None or seat > facility.capacity:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"Choose a seat numbered 1 to {facility.capacity}.")
+    elif seat is not None:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "This booking is for the whole space.")
+    elif payload.purpose is None:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Enter a purpose for your whole-space request.")
 
-    if approved_conflict_id(
-        database,
-        payload.facility_id,
-        payload.starts_at,
-        payload.ends_at,
-    ) is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="An approved booking already occupies part of this time slot.",
+    if reservation_conflicts(database, facility.id, payload.starts_at, payload.ends_at, seat_number=seat):
+        detail = (
+            "This seat is already reserved for part of that time."
+            if seat is not None else "A reservation already occupies this space for part of that time."
         )
+        raise HTTPException(status.HTTP_409_CONFLICT, detail)
 
     if duplicate_student_request_id(
         database,
@@ -138,7 +152,7 @@ def create_booking(
     ) is not None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="You already have an overlapping request for this facility.",
+            detail="You already have an overlapping booking or request at this facility.",
         )
 
     booking = Booking(
@@ -146,11 +160,16 @@ def create_booking(
         facility_id=payload.facility_id,
         starts_at=payload.starts_at,
         ends_at=payload.ends_at,
-        purpose=payload.purpose,
-        status=BookingStatus.PENDING,
+        seat_number=seat,
+        purpose=payload.purpose or "Individual seat reservation",
+        status=BookingStatus.APPROVED if seat is not None else BookingStatus.PENDING,
     )
     database.add(booking)
-    database.commit()
+    try:
+        database.commit()
+    except IntegrityError:
+        database.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, "Availability changed. Check your time slot again.") from None
     return get_owned_booking(booking.id, current_user.id, database)
 
 
@@ -186,7 +205,7 @@ def cancel_my_booking(
 ) -> Booking:
     """Cancel a pending or approved booking owned by the current user."""
 
-    booking = get_owned_booking(booking_id, current_user.id, database)
+    booking = get_owned_booking(booking_id, current_user.id, database, lock=True)
     if booking.status not in {BookingStatus.PENDING, BookingStatus.APPROVED}:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
